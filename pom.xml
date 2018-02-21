@@ -135,7 +135,7 @@
         </dependency>
 
         <dependency>
-            <groupId>org.rutebanken.helpers</groupId>
+            <groupId>org.entur.helpers</groupId>
             <artifactId>organisation</artifactId>
             <version>${rutebanken.helpers.version}</version>
         </dependency>
