@@ -16,7 +16,6 @@
 package no.rutebanken.nabu;
 
 import no.rutebanken.nabu.domain.SystemJobStatus;
-import no.rutebanken.nabu.domain.event.Event;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
