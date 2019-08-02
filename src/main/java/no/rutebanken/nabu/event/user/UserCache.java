@@ -59,7 +59,7 @@ public class UserCache implements UserRepository {
                 logger.info("orga ref :" + user.getOrganisationRef());
                 logger.info("orga :" + user.getOrganisation());
                 logger.info("resp set ref :" + user.getResponsibilitySetRefs());
-                newCache.put(user.getUsername(), user);
+//                newCache.put(user.getUsername(), user); TODO : à débug !!!
             });
 
             cache = newCache;
