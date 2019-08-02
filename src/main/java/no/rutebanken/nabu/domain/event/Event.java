@@ -51,6 +51,8 @@ public abstract class Event implements Comparable<Event> {
 
     private String username;
 
+    private String description;
+
     public Event() {
         registeredTime = Instant.now();
     }
@@ -119,6 +121,14 @@ public abstract class Event implements Comparable<Event> {
         this.username = username;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     @Override
     public int compareTo(Event o) {
         int corrCmp = ObjectUtils.compare(correlationId, o.correlationId);
@@ -178,6 +188,11 @@ public abstract class Event implements Comparable<Event> {
 
         public EventBuilder<T> username(String username) {
             event.setUsername(username);
+            return this;
+        }
+
+        public EventBuilder<T> description(String description) {
+            event.setDescription(description);
             return this;
         }
 
