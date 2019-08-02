@@ -55,7 +55,10 @@ public class UserCache implements UserRepository {
             List<UserDTO> allUsers = userResource.findAll();
             logger.info("found " + allUsers.size() + " user(s)");
             allUsers.stream().forEach(user -> {
-                logger.info("found user % : % " + user.getUsername());
+                logger.info("found user " + user.toString());
+                logger.info("orga ref :" + user.getOrganisationRef());
+                logger.info("orga :" + user.getOrganisation());
+                logger.info("resp set ref :" + user.getResponsibilitySetRefs());
                 newCache.put(user.getUsername(), user);
             });
 
