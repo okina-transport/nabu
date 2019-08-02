@@ -41,6 +41,7 @@ public class EventMapper {
         event.setNewValue(dto.newValue);
         event.setComment(dto.comment);
         event.setUsername(dto.username);
+        event.setDescription(dto.description);
         event.setLocation(dto.location);
 
         if (dto.geometry != null) {

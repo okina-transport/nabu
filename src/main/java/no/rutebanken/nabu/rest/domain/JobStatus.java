@@ -53,6 +53,12 @@ public class JobStatus {
     @JsonProperty("providerId")
     private Long providerId;
 
+    @JsonProperty("username")
+    private String username;
+
+    @JsonProperty("description")
+    private String description;
+
     public List<JobStatusEvent> getEvents() {
         return events;
     }
@@ -116,4 +122,12 @@ public class JobStatus {
     public void setProviderId(Long providerId) {
         this.providerId = providerId;
     }
+
+    public String getUsername() { return username; }
+
+    public void setUsername(String username) { this.username = username; }
+
+    public String getDescription() { return description; }
+
+    public void setDescription(String description) { this.description = description; }
 }
