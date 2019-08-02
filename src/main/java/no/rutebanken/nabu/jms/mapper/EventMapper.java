@@ -62,8 +62,8 @@ public class EventMapper {
         event.setReferential(dto.referential);
         event.setState(dto.state);
         event.setDomain(dto.domain);
-        event.setDomain(dto.username);
-        event.setDomain(dto.description);
+        event.setUsername(dto.username);
+        event.setDescription(dto.description);
 
         return event;
     }
