@@ -53,7 +53,7 @@ public class UserCache implements UserRepository {
             Cache<String, UserDTO> newCache = CacheBuilder.newBuilder().maximumSize(cacheMaxSize).build();
 
             List<UserDTO> allUsers = userResource.findAll();
-            logger.info("found " + allUsers.size() + "user(s)");
+            logger.info("found " + allUsers.size() + " user(s)");
             allUsers.stream().forEach(user -> {
                 logger.info("found user % : % " + user.getUsername());
                 newCache.put(user.getUsername(), user);
