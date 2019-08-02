@@ -29,6 +29,7 @@ import org.springframework.web.client.ResourceAccessException;
 
 import java.net.ConnectException;
 import java.util.Collection;
+import java.util.List;
 
 @Service
 public class UserCache implements UserRepository {
@@ -51,7 +52,12 @@ public class UserCache implements UserRepository {
         try {
             Cache<String, UserDTO> newCache = CacheBuilder.newBuilder().maximumSize(cacheMaxSize).build();
 
-            userResource.findAll().stream().forEach(user -> newCache.put(user.getUsername(), user));
+            List<UserDTO> allUsers = userResource.findAll();
+            logger.info("found " + allUsers.size() + "user(s)");
+            allUsers.stream().forEach(user -> {
+                logger.info("found user % : % " + user.getUsername());
+                newCache.put(user.getUsername(), user);
+            });
 
             cache = newCache;
 
