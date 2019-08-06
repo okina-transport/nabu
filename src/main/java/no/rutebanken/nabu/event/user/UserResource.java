@@ -17,6 +17,8 @@ package no.rutebanken.nabu.event.user;
 
 import no.rutebanken.nabu.event.user.dto.user.UserDTO;
 import no.rutebanken.nabu.security.TokenService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -33,6 +35,8 @@ import java.util.List;
 @Service
 public class UserResource {
 
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
     @Value("${user.registry.rest.service.url:http://baba/services/organisations/users?full=true}")
     private String restServiceUrl;
 
@@ -42,6 +46,8 @@ public class UserResource {
     private RestTemplate restTemplate = new RestTemplate();
 
     public List<UserDTO> findAll() {
+        logger.info("Baba user repo url is " + restServiceUrl);
+        logger.info("token used is " + tokenService.getToken());
         ResponseEntity<List<UserDTO>> rateResponse =
                 restTemplate.exchange(restServiceUrl,
                         HttpMethod.GET, tokenService.getEntityWithAuthenticationToken(), new ParameterizedTypeReference<List<UserDTO>>() {
