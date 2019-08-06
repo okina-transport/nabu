@@ -53,6 +53,8 @@ public abstract class Event implements Comparable<Event> {
 
     private String description;
 
+    private String type;
+
     public Event() {
         registeredTime = Instant.now();
     }
@@ -128,6 +130,12 @@ public abstract class Event implements Comparable<Event> {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) { this.type = type; }
 
     @Override
     public int compareTo(Event o) {

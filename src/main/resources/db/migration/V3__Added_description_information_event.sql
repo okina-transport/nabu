@@ -1,1 +1,0 @@
-ALTER TABLE event ADD COLUMN description character varying(255);

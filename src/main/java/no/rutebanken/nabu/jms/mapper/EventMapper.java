@@ -64,6 +64,7 @@ public class EventMapper {
         event.setDomain(dto.domain);
         event.setUsername(dto.username);
         event.setDescription(dto.description);
+        event.setType(dto.type);
 
         return event;
     }
