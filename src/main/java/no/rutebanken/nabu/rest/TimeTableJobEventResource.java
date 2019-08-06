@@ -155,7 +155,6 @@ public class TimeTableJobEventResource {
                 currentAggregation.setProviderId(in.getProviderId());
                 currentAggregation.setUsername(in.getUsername());
                 currentAggregation.setDescription(in.getDescription());
-                currentAggregation.setType(in.getType());
 
                 list.add(currentAggregation);
             }
@@ -170,6 +169,7 @@ public class TimeTableJobEventResource {
             agg.setEndStatus(event.state);
             long durationMillis = agg.getLastEvent().getTime() - agg.getFirstEvent().getTime();
             agg.setDurationMillis(durationMillis);
+            agg.setType(event.type);
         }
 
         Collections.sort(list,Comparator.comparing(JobStatus::getFirstEvent));
