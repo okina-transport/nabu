@@ -204,6 +204,11 @@ public abstract class Event implements Comparable<Event> {
             return this;
         }
 
+        public EventBuilder<T> type(String type) {
+            event.setType(type);
+            return this;
+        }
+
         public EventBuilder<T> correlationId(String correlationId) {
             event.setCorrelationId(correlationId);
             return this;

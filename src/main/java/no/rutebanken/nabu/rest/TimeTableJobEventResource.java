@@ -155,6 +155,7 @@ public class TimeTableJobEventResource {
                 currentAggregation.setProviderId(in.getProviderId());
                 currentAggregation.setUsername(in.getUsername());
                 currentAggregation.setDescription(in.getDescription());
+                currentAggregation.setType(in.getType());
 
                 list.add(currentAggregation);
             }

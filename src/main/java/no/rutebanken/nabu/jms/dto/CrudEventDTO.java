@@ -58,6 +58,8 @@ public class CrudEventDTO {
 
     public String description;
 
+    public String type;
+
     public static CrudEventDTO fromString(String string) {
         try {
             ObjectMapper mapper = new ObjectMapper();
