@@ -67,8 +67,8 @@ public class TimeTableJobEventResource {
     @GET
     @Path("/{providerId}")
     @PreAuthorize("hasRole('" + ROLE_ROUTE_DATA_ADMIN + "') or @providerAuthenticationService.hasRoleForProvider(authentication,'" + ROLE_ROUTE_DATA_EDIT + "',#providerId)")
-    public List<JobStatus> listStatus(@PathParam("providerId") Long providerId, @QueryParam("from") Date from,
-                                             @QueryParam("to") Date to, @QueryParam("action") List<String> actions,
+    public List<JobStatus> listStatus(@PathParam("providerId") Long providerId, @QueryParam("from") String from,
+                                             @QueryParam("to") String to, @QueryParam("action") List<String> actions,
                                              @QueryParam("state") List<JobStatus.State> states, @QueryParam("chouetteJobId") List<Long> jobIds,
                                              @QueryParam("fileName") List<String> fileNames) {
 
@@ -78,8 +78,8 @@ public class TimeTableJobEventResource {
             logger.debug("Returning status for provider with id '" + providerId + "'");
         }
 
-        Instant instantFrom = from == null ? null : from.toInstant();
-        Instant instantTo = to == null ? null : to.toInstant();
+        Instant instantFrom = from == null ? null : Instant.parse(from);
+        Instant instantTo = to == null ? null : Instant.parse(to);
 
         List<String> externalIds = jobIds == null ? null : jobIds.stream().map(jobId -> jobId.toString()).collect(Collectors.toList());
         List<Long> relatedProviderIds = mapToAllRelatedProviderIds(providerId);
@@ -113,8 +113,8 @@ public class TimeTableJobEventResource {
 
     @GET
     @PreAuthorize("hasRole('" + ROLE_ROUTE_DATA_ADMIN + "')")
-    public List<JobStatus> listStatus(@QueryParam("from") Date from,
-                                             @QueryParam("to") Date to, @QueryParam("action") List<String> actions,
+    public List<JobStatus> listStatus(@QueryParam("from") String from,
+                                             @QueryParam("to") String to, @QueryParam("action") List<String> actions,
                                              @QueryParam("state") List<JobStatus.State> states, @QueryParam("chouetteJobId") List<Long> jobIds,
                                              @QueryParam("fileName") List<String> fileNames) {
         return listStatus(null, from, to, actions, states, jobIds, fileNames);
