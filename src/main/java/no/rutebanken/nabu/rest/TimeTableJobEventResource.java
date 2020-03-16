@@ -16,6 +16,7 @@
 package no.rutebanken.nabu.rest;
 
 import io.swagger.annotations.Api;
+import no.rutebanken.nabu.domain.event.ActionType;
 import no.rutebanken.nabu.domain.event.JobEvent;
 import no.rutebanken.nabu.domain.event.JobState;
 import no.rutebanken.nabu.event.EventService;
@@ -68,9 +69,10 @@ public class TimeTableJobEventResource {
     @Path("/{providerId}")
     @PreAuthorize("hasRole('" + ROLE_ROUTE_DATA_ADMIN + "') or @providerAuthenticationService.hasRoleForProvider(authentication,'" + ROLE_ROUTE_DATA_EDIT + "',#providerId)")
     public List<JobStatus> listStatus(@PathParam("providerId") Long providerId, @QueryParam("from") String from,
-                                             @QueryParam("to") String to, @QueryParam("action") List<String> actions,
-                                             @QueryParam("state") List<JobStatus.State> states, @QueryParam("chouetteJobId") List<Long> jobIds,
-                                             @QueryParam("fileName") List<String> fileNames) {
+                                      @QueryParam("to") String to, @QueryParam("action") List<String> actions,
+                                      @QueryParam("state") List<JobStatus.State> states, @QueryParam("chouetteJobId") List<Long> jobIds,
+                                      @QueryParam("fileName") List<String> fileNames, @QueryParam("actionType") ActionType actionType,
+                                      @QueryParam("latest") boolean latest) {
 
         if (providerId == null) {
             logger.debug("Returning status for all providers");
@@ -86,7 +88,7 @@ public class TimeTableJobEventResource {
         try {
             List<JobEvent> eventsForProvider = eventService.findTimetableJobEvents(relatedProviderIds, instantFrom, instantTo,
                     actions, convertEnums(states, JobState.class), externalIds, fileNames);
-            return convert(eventsForProvider);
+            return convert(eventsForProvider, actionType, latest);
         } catch (Exception e) {
             logger.error("Erring fetching status for provider with id " + providerId + ": " + e.getMessage(), e);
             throw e;
@@ -114,10 +116,11 @@ public class TimeTableJobEventResource {
     @GET
     @PreAuthorize("hasRole('" + ROLE_ROUTE_DATA_ADMIN + "')")
     public List<JobStatus> listStatus(@QueryParam("from") String from,
-                                             @QueryParam("to") String to, @QueryParam("action") List<String> actions,
-                                             @QueryParam("state") List<JobStatus.State> states, @QueryParam("chouetteJobId") List<Long> jobIds,
-                                             @QueryParam("fileName") List<String> fileNames) {
-        return listStatus(null, from, to, actions, states, jobIds, fileNames);
+                                      @QueryParam("to") String to, @QueryParam("action") List<String> actions,
+                                      @QueryParam("state") List<JobStatus.State> states, @QueryParam("chouetteJobId") List<Long> jobIds,
+                                      @QueryParam("fileName") List<String> fileNames, @QueryParam("actionType") ActionType actionType,
+                                      @QueryParam("latest") boolean latest) {
+        return listStatus(null, from, to, actions, states, jobIds, fileNames, actionType, latest);
     }
 
     @DELETE
@@ -133,7 +136,7 @@ public class TimeTableJobEventResource {
         mapToAllRelatedProviderIds(providerId).stream().forEach(clearProviderId -> eventService.clear(STATUS_JOB_TYPE, clearProviderId));
     }
 
-    public List<JobStatus> convert(List<JobEvent> statusForProvider) {
+    public List<JobStatus> convert(List<JobEvent> statusForProvider, ActionType actionType, boolean latest) {
         List<JobStatus> list = new ArrayList<>();
         // Map from internal Status object to Rest service JobStatusEvent object
         String correlationId = null;
@@ -172,7 +175,26 @@ public class TimeTableJobEventResource {
             agg.setType(event.type);
         }
 
-        Collections.sort(list,Comparator.comparing(JobStatus::getFirstEvent));
+        Collections.sort(list, Comparator.comparing(JobStatus::getFirstEvent));
+
+        if (actionType != null && !list.isEmpty()) {
+
+            if(latest) {
+                List<JobStatus> jobStatusFiltered = list.stream()
+                        .filter(event -> event.getActionType().equals(actionType))
+                        .collect(Collectors.toList());
+                return Collections.singletonList(jobStatusFiltered.get(jobStatusFiltered.size() - 1));
+            }
+            else {
+                return list.stream()
+                        .filter(event -> event.getActionType().equals(actionType))
+                        .collect(Collectors.toList());
+            }
+        }
+
+        if (latest && !list.isEmpty()) {
+            return Collections.singletonList(list.get(list.size() - 1));
+        }
 
         return list;
     }

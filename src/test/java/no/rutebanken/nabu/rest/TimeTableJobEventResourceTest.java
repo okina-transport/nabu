@@ -49,7 +49,7 @@ public class TimeTableJobEventResourceTest {
         rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename1", 2l, "2", ACTION1, JobState.FAILED, "a", t0.plusMillis(3), "ost"));
 
 
-        List<JobStatus> listStatus = new TimeTableJobEventResource().convert(rawEvents);
+        List<JobStatus> listStatus = new TimeTableJobEventResource().convert(rawEvents, null, false);
 
         Assert.assertNotNull(listStatus);
         Assert.assertEquals(2, listStatus.size());

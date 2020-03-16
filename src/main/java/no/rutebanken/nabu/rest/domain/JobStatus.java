@@ -15,12 +15,25 @@
 
 package no.rutebanken.nabu.rest.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonRootName;
+import no.rutebanken.nabu.domain.event.ActionType;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonRootName;
+import static no.rutebanken.nabu.domain.event.TimeTableAction.DATASPACE_TRANSFER;
+import static no.rutebanken.nabu.domain.event.TimeTableAction.EXPORT;
+import static no.rutebanken.nabu.domain.event.TimeTableAction.EXPORT_CONCERTO;
+import static no.rutebanken.nabu.domain.event.TimeTableAction.EXPORT_NETEX;
+import static no.rutebanken.nabu.domain.event.TimeTableAction.FILE_CLASSIFICATION;
+import static no.rutebanken.nabu.domain.event.TimeTableAction.FILE_TRANSFER;
+import static no.rutebanken.nabu.domain.event.TimeTableAction.IMPORT;
+import static no.rutebanken.nabu.domain.event.TimeTableAction.VALIDATION_LEVEL_1;
+import static no.rutebanken.nabu.domain.event.TimeTableAction.VALIDATION_LEVEL_2;
 
 @JsonRootName("jobs")
 public class JobStatus {
@@ -126,15 +139,52 @@ public class JobStatus {
         this.providerId = providerId;
     }
 
-    public String getUsername() { return username; }
+    public String getUsername() {
+        return username;
+    }
 
-    public void setUsername(String username) { this.username = username; }
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-    public String getDescription() { return description; }
+    public String getDescription() {
+        return description;
+    }
 
-    public void setDescription(String description) { this.description = description; }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-    public String getType() { return type; }
+    public String getType() {
+        return type;
+    }
 
-    public void setType(String type) { this.type = type; }
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    @JsonIgnore
+    public ActionType getActionType() {
+
+        if (events.stream().anyMatch(event -> StringUtils.equals(event.action, FILE_TRANSFER.toString())) ||
+                events.stream().anyMatch(event -> StringUtils.equals(event.action, FILE_CLASSIFICATION.toString())) ||
+                events.stream().anyMatch(event -> StringUtils.equals(event.action, IMPORT.toString()))) {
+            return ActionType.IMPORTER;
+        } else if (
+                (
+                        !events.stream().anyMatch(event -> StringUtils.equals(event.action, FILE_TRANSFER.toString())) &&
+                        !events.stream().anyMatch(event -> StringUtils.equals(event.action, FILE_CLASSIFICATION.toString())) &&
+                        !events.stream().anyMatch(event -> StringUtils.equals(event.action, IMPORT.toString())) &&
+                        !events.stream().anyMatch(event -> StringUtils.equals(event.action, VALIDATION_LEVEL_1.toString())) &&
+                        !events.stream().anyMatch(event -> StringUtils.equals(event.action, DATASPACE_TRANSFER.toString())) &&
+                        !events.stream().anyMatch(event -> StringUtils.equals(event.action, VALIDATION_LEVEL_2.toString()))
+                ) &&
+                        events.stream().anyMatch(event -> StringUtils.equals(event.action, EXPORT_NETEX.toString())) ||
+                        events.stream().anyMatch(event -> StringUtils.equals(event.action, EXPORT.toString())) ||
+                        events.stream().anyMatch(event -> StringUtils.equals(event.action, EXPORT_CONCERTO.toString()))
+        ) {
+            return ActionType.EXPORTER;
+        }
+        return ActionType.VALIDATOR;
+    }
 }
