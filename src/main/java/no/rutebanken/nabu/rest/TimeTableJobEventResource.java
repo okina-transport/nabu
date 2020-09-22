@@ -88,7 +88,7 @@ public class TimeTableJobEventResource {
         try {
             List<JobEvent> eventsForProvider = eventService.findTimetableJobEvents(relatedProviderIds, instantFrom, instantTo,
                     actions, convertEnums(states, JobState.class), externalIds, fileNames);
-            return convert(eventsForProvider, actionType, latest);
+            return convert(eventsForProvider, actionType, latest, actions);
         } catch (Exception e) {
             logger.error("Erring fetching status for provider with id " + providerId + ": " + e.getMessage(), e);
             throw e;
@@ -137,6 +137,10 @@ public class TimeTableJobEventResource {
     }
 
     public List<JobStatus> convert(List<JobEvent> statusForProvider, ActionType actionType, boolean latest) {
+        return convert(statusForProvider, actionType, latest, null);
+    }
+
+    public List<JobStatus> convert(List<JobEvent> statusForProvider, ActionType actionType, boolean latest, List<String> actions) {
         List<JobStatus> list = new ArrayList<>();
         // Map from internal Status object to Rest service JobStatusEvent object
         String correlationId = null;
@@ -162,8 +166,12 @@ public class TimeTableJobEventResource {
                 list.add(currentAggregation);
             }
 
-
-            currentAggregation.addEvent(JobStatusEvent.createFromJobEvent(in));
+            // validation job events might include export event: we don't want to include export events so that JobStatus.getActionType returns the correct action type
+            if (actions != null && ActionType.VALIDATOR.equals(actionType) && actions.contains(in.getAction())) {
+                currentAggregation.addEvent(JobStatusEvent.createFromJobEvent(in));
+            } else if (actions == null) {
+                currentAggregation.addEvent(JobStatusEvent.createFromJobEvent(in));
+            }
         }
 
         for (JobStatus agg : list) {
