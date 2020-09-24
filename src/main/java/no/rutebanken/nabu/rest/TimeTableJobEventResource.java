@@ -166,10 +166,14 @@ public class TimeTableJobEventResource {
                 list.add(currentAggregation);
             }
 
-            // validation job events might include export event: we don't want to include export events so that JobStatus.getActionType returns the correct action type
-            if (actions != null && ActionType.VALIDATOR.equals(actionType) && actions.contains(in.getAction())) {
-                currentAggregation.addEvent(JobStatusEvent.createFromJobEvent(in));
-            } else if (actions == null) {
+            if (ActionType.VALIDATOR.equals(actionType)) {
+                // validation job events might include export event: we don't want to include export events so that JobStatus.getActionType returns the correct action type
+                if (actions != null && actions.contains(in.getAction())) {
+                    currentAggregation.addEvent(JobStatusEvent.createFromJobEvent(in));
+                } else if (actions == null) {
+                    currentAggregation.addEvent(JobStatusEvent.createFromJobEvent(in));
+                }
+            } else {
                 currentAggregation.addEvent(JobStatusEvent.createFromJobEvent(in));
             }
         }
