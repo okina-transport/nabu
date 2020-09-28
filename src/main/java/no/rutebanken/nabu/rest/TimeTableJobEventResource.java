@@ -151,7 +151,7 @@ public class TimeTableJobEventResource {
         List<JobEvent> sortedStatusForProvider = statusForProvider.stream().sorted(Comparator.comparing(JobEvent::getCorrelationId).thenComparing(JobEvent::getEventTime)).collect(Collectors.toList());
 
         for (JobEvent in : sortedStatusForProvider) {
-            if (StringUtils.isBlank(excludeType) || !excludeType.equals(in.getType())) {
+            if (StringUtils.isBlank(excludeType) || StringUtils.isBlank(in.getType()) || (StringUtils.isNotBlank(in.getType()) && !excludeType.equals(in.getType())) ) {
 
                 if (!in.getCorrelationId().equals(correlationId)) {
 
