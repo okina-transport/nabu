@@ -24,6 +24,7 @@ import no.rutebanken.nabu.provider.ProviderRepository;
 import no.rutebanken.nabu.provider.model.Provider;
 import no.rutebanken.nabu.rest.domain.JobStatus;
 import no.rutebanken.nabu.rest.domain.JobStatusEvent;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +73,8 @@ public class TimeTableJobEventResource {
                                       @QueryParam("to") String to, @QueryParam("action") List<String> actions,
                                       @QueryParam("state") List<JobStatus.State> states, @QueryParam("chouetteJobId") List<Long> jobIds,
                                       @QueryParam("fileName") List<String> fileNames, @QueryParam("actionType") ActionType actionType,
-                                      @QueryParam("latest") boolean latest) {
+                                      @QueryParam("latest") boolean latest,
+                                      @QueryParam("excludeType") String excludeType) {
 
         if (providerId == null) {
             logger.debug("Returning status for all providers");
@@ -88,7 +90,7 @@ public class TimeTableJobEventResource {
         try {
             List<JobEvent> eventsForProvider = eventService.findTimetableJobEvents(relatedProviderIds, instantFrom, instantTo,
                     actions, convertEnums(states, JobState.class), externalIds, fileNames);
-            return convert(eventsForProvider, actionType, latest, actions);
+            return convert(eventsForProvider, actionType, latest, actions, excludeType);
         } catch (Exception e) {
             logger.error("Erring fetching status for provider with id " + providerId + ": " + e.getMessage(), e);
             throw e;
@@ -120,7 +122,7 @@ public class TimeTableJobEventResource {
                                       @QueryParam("state") List<JobStatus.State> states, @QueryParam("chouetteJobId") List<Long> jobIds,
                                       @QueryParam("fileName") List<String> fileNames, @QueryParam("actionType") ActionType actionType,
                                       @QueryParam("latest") boolean latest) {
-        return listStatus(null, from, to, actions, states, jobIds, fileNames, actionType, latest);
+        return listStatus(null, from, to, actions, states, jobIds, fileNames, actionType, latest, null);
     }
 
     @DELETE
@@ -137,10 +139,10 @@ public class TimeTableJobEventResource {
     }
 
     public List<JobStatus> convert(List<JobEvent> statusForProvider, ActionType actionType, boolean latest) {
-        return convert(statusForProvider, actionType, latest, null);
+        return convert(statusForProvider, actionType, latest, null, null);
     }
 
-    public List<JobStatus> convert(List<JobEvent> statusForProvider, ActionType actionType, boolean latest, List<String> actions) {
+    public List<JobStatus> convert(List<JobEvent> statusForProvider, ActionType actionType, boolean latest, List<String> actions, String excludeType) {
         List<JobStatus> list = new ArrayList<>();
         // Map from internal Status object to Rest service JobStatusEvent object
         String correlationId = null;
@@ -166,11 +168,17 @@ public class TimeTableJobEventResource {
                 list.add(currentAggregation);
             }
 
-            // validation job events might include export event: we don't want to include export events so that JobStatus.getActionType returns the correct action type
-            if (actions != null && ActionType.VALIDATOR.equals(actionType) && actions.contains(in.getAction())) {
-                currentAggregation.addEvent(JobStatusEvent.createFromJobEvent(in));
-            } else if (actions == null) {
-                currentAggregation.addEvent(JobStatusEvent.createFromJobEvent(in));
+            if (StringUtils.isBlank(excludeType) || !excludeType.equals(in.getType())) {
+                if (ActionType.VALIDATOR.equals(actionType)) {
+                    // validation job events might include export event: we don't want to include export events so that JobStatus.getActionType returns the correct action type
+                    if (actions != null && ActionType.VALIDATOR.equals(actionType) && actions.contains(in.getAction())) {
+                        currentAggregation.addEvent(JobStatusEvent.createFromJobEvent(in));
+                    } else if (actions == null) {
+                        currentAggregation.addEvent(JobStatusEvent.createFromJobEvent(in));
+                    }
+                } else {
+                    currentAggregation.addEvent(JobStatusEvent.createFromJobEvent(in));
+                }
             }
         }
 
