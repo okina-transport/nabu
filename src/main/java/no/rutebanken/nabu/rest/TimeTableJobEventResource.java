@@ -151,24 +151,24 @@ public class TimeTableJobEventResource {
         List<JobEvent> sortedStatusForProvider = statusForProvider.stream().sorted(Comparator.comparing(JobEvent::getCorrelationId).thenComparing(JobEvent::getEventTime)).collect(Collectors.toList());
 
         for (JobEvent in : sortedStatusForProvider) {
-
-            if (!in.getCorrelationId().equals(correlationId)) {
-
-                correlationId = in.getCorrelationId();
-
-                // Create new Aggregation
-                currentAggregation = new JobStatus();
-                currentAggregation.setFirstEvent(Date.from(in.getEventTime()));
-                currentAggregation.setFileName(in.getName());
-                currentAggregation.setCorrelationId(in.getCorrelationId());
-                currentAggregation.setProviderId(in.getProviderId());
-                currentAggregation.setUsername(in.getUsername());
-                currentAggregation.setDescription(in.getDescription());
-
-                list.add(currentAggregation);
-            }
-
             if (StringUtils.isBlank(excludeType) || !excludeType.equals(in.getType())) {
+
+                if (!in.getCorrelationId().equals(correlationId)) {
+
+                    correlationId = in.getCorrelationId();
+
+                    // Create new Aggregation
+                    currentAggregation = new JobStatus();
+                    currentAggregation.setFirstEvent(Date.from(in.getEventTime()));
+                    currentAggregation.setFileName(in.getName());
+                    currentAggregation.setCorrelationId(in.getCorrelationId());
+                    currentAggregation.setProviderId(in.getProviderId());
+                    currentAggregation.setUsername(in.getUsername());
+                    currentAggregation.setDescription(in.getDescription());
+
+                    list.add(currentAggregation);
+                }
+
                 if (ActionType.VALIDATOR.equals(actionType)) {
                     // validation job events might include export event: we don't want to include export events so that JobStatus.getActionType returns the correct action type
                     if (actions != null && ActionType.VALIDATOR.equals(actionType) && actions.contains(in.getAction())) {
