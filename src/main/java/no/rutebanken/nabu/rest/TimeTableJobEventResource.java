@@ -183,18 +183,21 @@ public class TimeTableJobEventResource {
         }
 
         for (JobStatus agg : list) {
-            JobStatusEvent event = agg.getEvents().get(agg.getEvents().size() - 1);
-            agg.setLastEvent(event.date);
-            agg.setEndStatus(event.state);
-            long durationMillis = agg.getLastEvent().getTime() - agg.getFirstEvent().getTime();
-            agg.setDurationMillis(durationMillis);
-            agg.setType(event.type);
+            if(!agg.getEvents().isEmpty()) {
+                JobStatusEvent event = agg.getEvents().get(agg.getEvents().size() - 1);
+                agg.setLastEvent(event.date);
+                agg.setEndStatus(event.state);
+                long durationMillis = agg.getLastEvent().getTime() - agg.getFirstEvent().getTime();
+                agg.setDurationMillis(durationMillis);
+                agg.setType(event.type);
+            }
         }
+
+        list = list.stream().filter(agg -> !agg.getEvents().isEmpty()).collect(Collectors.toList());
 
         Collections.sort(list, Comparator.comparing(JobStatus::getFirstEvent));
 
         if (actionType != null && !list.isEmpty()) {
-
             if(latest) {
                 List<JobStatus> jobStatusFiltered = list.stream()
                         .filter(event -> event.getActionType().equals(actionType))
