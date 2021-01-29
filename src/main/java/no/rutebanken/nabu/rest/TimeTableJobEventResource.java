@@ -133,6 +133,29 @@ public class TimeTableJobEventResource {
         return convert(statusForProvider, actionType, latest, null, null);
     }
 
+    /**
+     * Checks if the input string is an excluded type or not.
+     * excludedTypes can be a single type (e.g : GTFS) or multiple types separated by comma (e.g:GTFS,NEPTUNE)
+     * @param exludedTypes
+     *      Type, or list of types separated by comma
+     * @param input
+     *      The input type to check
+     * @return
+     *      True : The input type is an exluded type
+     *      False : The input type is NOT an excluded type
+     */
+    private boolean isExludedType(String exludedTypes, String input){
+
+        if (StringUtils.isEmpty(exludedTypes))
+            return true;
+
+        if (!exludedTypes.contains(","))
+            return exludedTypes.equals(input);
+
+        String[] exludedTypesTab = exludedTypes.split(",");
+        return Arrays.asList(exludedTypesTab).contains(input);
+    }
+
     public List<JobStatus> convert(List<JobEvent> statusForProvider, ActionType actionType, boolean latest, List<String> actions, String excludeType) {
         List<JobStatus> list = new ArrayList<>();
         // Map from internal Status object to Rest service JobStatusEvent object
@@ -142,7 +165,7 @@ public class TimeTableJobEventResource {
         List<JobEvent> sortedStatusForProvider = statusForProvider.stream().sorted(Comparator.comparing(JobEvent::getCorrelationId).thenComparing(JobEvent::getEventTime)).collect(Collectors.toList());
 
         for (JobEvent in : sortedStatusForProvider) {
-            if (StringUtils.isBlank(excludeType) || StringUtils.isBlank(in.getType()) || (StringUtils.isNotBlank(in.getType()) && !excludeType.equals(in.getType())) ) {
+            if (StringUtils.isBlank(excludeType) || StringUtils.isBlank(in.getType()) || (StringUtils.isNotBlank(in.getType()) && !isExludedType(excludeType,in.getType()))) {
 
                 if (!in.getCorrelationId().equals(correlationId)) {
 
