@@ -171,14 +171,6 @@ public class JobStatus {
                 events.stream().anyMatch(event -> StringUtils.equals(event.action, IMPORT.toString()))) {
             return ActionType.IMPORTER;
         } else if (
-                (
-                        !events.stream().anyMatch(event -> StringUtils.equals(event.action, FILE_TRANSFER.toString())) &&
-                        !events.stream().anyMatch(event -> StringUtils.equals(event.action, FILE_CLASSIFICATION.toString())) &&
-                        !events.stream().anyMatch(event -> StringUtils.equals(event.action, IMPORT.toString())) &&
-                        !events.stream().anyMatch(event -> StringUtils.equals(event.action, VALIDATION_LEVEL_1.toString())) &&
-                        !events.stream().anyMatch(event -> StringUtils.equals(event.action, DATASPACE_TRANSFER.toString())) &&
-                        !events.stream().anyMatch(event -> StringUtils.equals(event.action, VALIDATION_LEVEL_2.toString()))
-                ) &&
                         events.stream().anyMatch(event -> StringUtils.equals(event.action, EXPORT_NETEX.toString())) ||
                         events.stream().anyMatch(event -> StringUtils.equals(event.action, EXPORT.toString())) ||
                         events.stream().anyMatch(event -> StringUtils.equals(event.action, EXPORT_CONCERTO.toString()))
