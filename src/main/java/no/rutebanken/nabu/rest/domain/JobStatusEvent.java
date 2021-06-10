@@ -41,20 +41,24 @@ public class JobStatusEvent {
     @JsonProperty("type")
     public String type;
 
+    @JsonProperty("name")
+    public String name;
 
-    public JobStatusEvent(String action, State state, Date date, Long chouetteJobId, String referential, String type) {
+
+    public JobStatusEvent(String action, State state, Date date, Long chouetteJobId, String referential, String type, String name) {
         this.action = action;
         this.state = state;
         this.date = date;
         this.chouetteJobId = chouetteJobId;
         this.referential = referential;
         this.type = type;
+        this.name = name;
     }
 
     public static JobStatusEvent createFromJobEvent(JobEvent e) {
         Long chouetteId = e.getExternalId() == null ? null : Long.parseLong(e.getExternalId());
         return new JobStatusEvent(e.getAction(),
                                          JobStatus.State.valueOf(e.getState().name()), Date.from(e.getEventTime()), chouetteId
-                                         , e.getReferential(), e.getType());
+                                         , e.getReferential(), e.getType(), e.getName());
     }
 }
