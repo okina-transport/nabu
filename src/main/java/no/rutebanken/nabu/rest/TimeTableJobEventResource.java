@@ -36,10 +36,10 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static no.rutebanken.nabu.helper.organisation.APIAuthorizationConstants.READ_ROUTE_DATA;
 import static no.rutebanken.nabu.rest.mapper.EnumMapper.convertEnums;
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_ROUTE_DATA_ADMIN;
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_ROUTE_DATA_EDIT;
-
 
 @Component
 @Produces("application/json")
@@ -59,7 +59,7 @@ public class TimeTableJobEventResource {
 
     @GET
     @Path("/{providerId}")
-    @PreAuthorize("hasRole('" + ROLE_ROUTE_DATA_ADMIN + "') or @providerAuthenticationService.hasRoleForProvider(authentication,'" + ROLE_ROUTE_DATA_EDIT + "',#providerId)")
+    @PreAuthorize("hasRole('" + ROLE_ROUTE_DATA_ADMIN + "') or hasRole('" + READ_ROUTE_DATA + "') or @providerAuthenticationService.hasRoleForProvider(authentication,'" + ROLE_ROUTE_DATA_EDIT + "',#providerId)")
     public List<JobStatus> listStatus(@PathParam("providerId") Long providerId, @QueryParam("from") String from,
                                       @QueryParam("to") String to, @QueryParam("action") List<String> actions,
                                       @QueryParam("state") List<JobStatus.State> states, @QueryParam("chouetteJobId") List<Long> jobIds,
@@ -107,7 +107,7 @@ public class TimeTableJobEventResource {
     }
 
     @GET
-    @PreAuthorize("hasRole('" + ROLE_ROUTE_DATA_ADMIN + "')")
+    @PreAuthorize("hasRole('" + ROLE_ROUTE_DATA_ADMIN + "') or hasRole('" + READ_ROUTE_DATA + "')")
     public List<JobStatus> listStatus(@QueryParam("from") String from,
                                       @QueryParam("to") String to, @QueryParam("action") List<String> actions,
                                       @QueryParam("state") List<JobStatus.State> states, @QueryParam("chouetteJobId") List<Long> jobIds,
