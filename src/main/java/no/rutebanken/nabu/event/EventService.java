@@ -46,6 +46,11 @@ public class EventService {
         return eventRepository.findTimetableJobEvents(providerIds, from, to, actions, states, externalIds, fileNames);
     }
 
+    public List<JobEvent> findExports(String exportType,List<Long> providerIds, int maxExportResults) {
+        return eventRepository.getExports(exportType, providerIds,maxExportResults);
+    }
+
+
 
     public void addEvent(Event event) {
         eventRepository.save(event);

@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.time.Instant;
 import java.util.HashMap;
@@ -145,6 +146,35 @@ public class EventRepositoryImpl extends SimpleJpaRepository<Event, Long> implem
         TypedQuery<CrudEvent> query = entityManager.createQuery(sb.toString(), CrudEvent.class);
         params.forEach((param, value) -> query.setParameter(param, value));
 
+        return query.getResultList();
+    }
+
+    public List<JobEvent> getExports(String exportType, List<Long> providerIds, int maxExportResults) {
+
+        String whereClause= "";
+        if ("gtfs".equals(exportType)){
+            whereClause = " WHERE e2.action = 'EXPORT' AND e2.type = 'gtfs' ";
+        }else if ("netex".equals(exportType)){
+            whereClause = " WHERE e2.action = 'EXPORT_NETEX' AND e2.type = 'netex' ";
+        }else if ("neptune".equals(exportType)) {
+            whereClause = " WHERE e2.action = 'EXPORT' AND e2.type = 'neptune' ";
+        }
+
+        StringBuilder sb = new StringBuilder("SELECT e.* FROM event e WHERE pk in (");
+
+        sb.append( " SELECT MAX(pk) max_pk FROM event e2");
+        sb.append(whereClause);
+        Map<String, Object> params = new HashMap<>();
+        if (!CollectionUtils.isEmpty(providerIds)) {
+            params.put("providerIds", providerIds);
+            sb.append("and e2.provider_id in (:providerIds)");
+        }
+        sb.append("   group by correlation_id ) ORDER by e.event_time desc " );
+
+
+        Query query = entityManager.createNativeQuery(sb.toString(), JobEvent.class);
+        params.forEach((param, value) -> query.setParameter(param, value));
+        query.setMaxResults(maxExportResults);
         return query.getResultList();
     }
 

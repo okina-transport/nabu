@@ -88,6 +88,45 @@ public class TimeTableJobEventResource {
         }
     }
 
+
+    @GET
+    @Path("getExports/{providerId}")
+    @PreAuthorize("hasRole('" + ROLE_ROUTE_DATA_ADMIN + "') or hasRole('" + READ_ROUTE_DATA + "') or @providerAuthenticationService.hasRoleForProvider(authentication,'" + ROLE_ROUTE_DATA_EDIT + "',#providerId)")
+    public List<JobStatus> listExportStatus(@PathParam("providerId") Long providerId, @QueryParam("exportType") String exportType,
+                                      @QueryParam("maxResults") Integer maxResults) {
+
+
+        if (providerId == null) {
+            logger.debug("Returning status for all providers");
+        } else {
+            logger.debug("Returning status for provider with id '" + providerId + "'");
+        }
+
+        if (maxResults == null){
+            maxResults = 20;
+        }
+
+        List<Long> relatedProviderIds = mapToAllRelatedProviderIds(providerId);
+        try {
+
+            List<JobEvent> eventsForProvider = eventService.findExports(exportType,relatedProviderIds,maxResults);
+
+            ActionType actionType = null;
+            if ("gtfs".equals(exportType)){
+                actionType = ActionType.EXPORTER;
+            }else if ("netex".equals(exportType)){
+                actionType = null;
+            }
+
+
+            return convert(eventsForProvider, actionType, false, null, null);
+        } catch (Exception e) {
+            logger.error("Erring fetching status for provider with id " + providerId + ": " + e.getMessage(), e);
+            throw e;
+        }
+
+
+    }
     /**
      * Return all ids for providers related to a given provider, that is the provider it self + either the provider that it migrates to or the provider that migrates to it.
      */

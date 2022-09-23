@@ -39,4 +39,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     void clear(String domain, Long providerId);
 
+    List<JobEvent> getExports(String exportType, List<Long> providerIds, int maxExportResults) ;
+
 }
