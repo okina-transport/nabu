@@ -29,6 +29,7 @@ import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -216,6 +217,33 @@ public class EventRepositoryImpl extends SimpleJpaRepository<Event, Long> implem
     @Override
     public void clear(String domain, Long providerId) {
         this.entityManager.createQuery("delete from JobEvent je where je.domain=:domain and je.providerId=:providerId").setParameter("domain", domain).setParameter("providerId", providerId).executeUpdate();
+    }
+
+    @Override
+    public List<JobEvent> getJobEventsByActionAndType(String action, String type){
+        StringBuilder sb = new StringBuilder("SELECT e FROM JobEvent e WHERE ");
+        Map<String, Object> params = new HashMap<>();
+        if (!StringUtils.isEmpty(action)) {
+            params.put("action", action);
+            sb.append("e.action = :action ");
+        }
+
+        if (!StringUtils.isEmpty(type)) {
+            params.put("type", type);
+            sb.append("and e.type = :type ");
+        }
+
+        sb.append("ORDER by e.eventTime DESC " );
+        TypedQuery<JobEvent> query = entityManager.createQuery(sb.toString(), JobEvent.class);
+        params.forEach(query::setParameter);
+        return query.getResultList();
+    }
+
+    @Override
+    public void deleteAllByPk(List<Long> ids) {
+        this.entityManager.createQuery("delete from JobEvent je where je.pk in :ids")
+                .setParameter("ids", ids)
+                .executeUpdate();
     }
 
 

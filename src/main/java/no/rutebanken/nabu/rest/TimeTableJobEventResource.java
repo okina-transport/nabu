@@ -271,4 +271,11 @@ public class TimeTableJobEventResource {
         return list;
     }
 
+    @DELETE
+    @Path("/clear-events")
+    @PreAuthorize("hasRole('" + ROLE_ROUTE_DATA_ADMIN + "')")
+    public void clearEvents(@QueryParam("keepDays") final int keepDays, @QueryParam("keepJobs") final int keepJobs) {
+        eventService.clearByDaysOrNumberEvents(keepDays, keepJobs);
+    }
+
 }

@@ -18,18 +18,28 @@ package no.rutebanken.nabu.event;
 import no.rutebanken.nabu.domain.event.Event;
 import no.rutebanken.nabu.domain.event.JobEvent;
 import no.rutebanken.nabu.domain.event.JobState;
+import no.rutebanken.nabu.domain.event.TimeTableAction;
 import no.rutebanken.nabu.repository.EventRepository;
 import no.rutebanken.nabu.repository.NotificationRepository;
+import org.joda.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class EventService {
+
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private EventRepository eventRepository;
@@ -68,5 +78,56 @@ public class EventService {
     public void clear(String domain, Long providerId) {
         notificationRepository.clear(domain, providerId);
         eventRepository.clear(domain, providerId);
+    }
+
+    public void clearByDaysOrNumberEvents(int keepDays, int keepJobsPerReferential) {
+        Map<String, List<JobEvent>> jobEventsMap = new HashMap<>();
+        jobEventsMap.put(TimeTableAction.FILE_ANALYZE.toString(), eventRepository.getJobEventsByActionAndType(TimeTableAction.FILE_ANALYZE.toString(), null));
+        jobEventsMap.put(TimeTableAction.IMPORT.toString(), eventRepository.getJobEventsByActionAndType(TimeTableAction.IMPORT.toString(), null));
+        jobEventsMap.put(TimeTableAction.VALIDATION_LEVEL_1.toString(), eventRepository.getJobEventsByActionAndType(TimeTableAction.VALIDATION_LEVEL_1.toString(), null));
+        jobEventsMap.put(TimeTableAction.DATASPACE_TRANSFER.toString(), eventRepository.getJobEventsByActionAndType(TimeTableAction.DATASPACE_TRANSFER.toString(), null));
+        jobEventsMap.put(TimeTableAction.VALIDATION_LEVEL_2.toString(), eventRepository.getJobEventsByActionAndType(TimeTableAction.VALIDATION_LEVEL_2.toString(), null));
+        jobEventsMap.put(TimeTableAction.EXPORT.toString(), eventRepository.getJobEventsByActionAndType(TimeTableAction.EXPORT.toString(), "gtfs"));
+        jobEventsMap.put(TimeTableAction.EXPORT.toString(), eventRepository.getJobEventsByActionAndType(TimeTableAction.EXPORT.toString(), "neptune"));
+        jobEventsMap.put(TimeTableAction.EXPORT_NETEX.toString(), eventRepository.getJobEventsByActionAndType(TimeTableAction.EXPORT_NETEX.toString(), null));
+
+        List<Long> idsEventToDelete = new ArrayList<>();
+
+        for (List<JobEvent> jobs : jobEventsMap.values()) {
+            getOldJobEvents(jobs, keepDays, keepJobsPerReferential, idsEventToDelete);
+        }
+
+        eventRepository.deleteAllByPk(idsEventToDelete);
+
+        logger.info("Removed old events. Count: " + idsEventToDelete.size());
+    }
+
+    private void getOldJobEvents(List<JobEvent> jobs, int keepDays, int keepJobsPerReferential, List<Long> idsEventToDelete) {
+        Map<String, Map<String, List<JobEvent>>> jobsEventMapGrouping = jobs
+                .stream()
+                .collect(Collectors.groupingBy(JobEvent::getReferential,
+                        Collectors.groupingBy(JobEvent::getCorrelationId)));
+
+
+        for (Map<String, List<JobEvent>> jobsEventMap : jobsEventMapGrouping.values()) {
+            if (jobsEventMap.values().size() > keepJobsPerReferential) {
+                int numberJobToDeleteGroupingByCorrelationId = jobsEventMap.values().size() - keepJobsPerReferential;
+                for(List<JobEvent> jobEvents : jobsEventMap.values()){
+                    LocalDateTime ageLimit = LocalDateTime.now().minusDays(keepDays);
+                    List<Long> deleteJobsEvent = jobEvents.stream()
+                            .filter(job -> job.getEventTime() != null && job.getEventTime().isBefore(ageLimit.toDate().toInstant()))
+                            .map(JobEvent::getPk)
+                            .collect(Collectors.toList());
+
+                    if (!deleteJobsEvent.isEmpty()) {
+                        idsEventToDelete.addAll(deleteJobsEvent);
+                        numberJobToDeleteGroupingByCorrelationId--;
+                    }
+                    if(numberJobToDeleteGroupingByCorrelationId == 0){
+                        break;
+                    }
+                }
+            }
+        }
     }
 }

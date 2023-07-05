@@ -41,4 +41,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     List<JobEvent> getExports(String exportType, List<Long> providerIds, int maxExportResults) ;
 
+    List<JobEvent> getJobEventsByActionAndType(String action, String type);
+
+    void deleteAllByPk (List<Long> ids);
+
 }
