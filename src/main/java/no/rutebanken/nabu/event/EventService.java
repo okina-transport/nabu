@@ -21,6 +21,7 @@ import no.rutebanken.nabu.domain.event.JobState;
 import no.rutebanken.nabu.domain.event.TimeTableAction;
 import no.rutebanken.nabu.repository.EventRepository;
 import no.rutebanken.nabu.repository.NotificationRepository;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,6 +106,7 @@ public class EventService {
     private void getOldJobEvents(List<JobEvent> jobs, int keepDays, int keepJobsPerReferential, List<Long> idsEventToDelete) {
         Map<String, Map<String, List<JobEvent>>> jobsEventMapGrouping = jobs
                 .stream()
+                .filter(jobEvent -> StringUtils.isNotEmpty(jobEvent.getReferential()))
                 .collect(Collectors.groupingBy(JobEvent::getReferential,
                         Collectors.groupingBy(JobEvent::getCorrelationId)));
 
