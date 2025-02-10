@@ -41,11 +41,11 @@
         <!-- versions for use in mvn plugins as we cannot inherit them from a BOM -->
         <rutebanken.helpers.version>0.0.3-SNAPSHOT</rutebanken.helpers.version>
         <docker.maven.plugin.version>0.45.1</docker.maven.plugin.version>
-        <spring-boot-plugin.version>1.5.6.RELEASE</spring-boot-plugin.version>
-        <spring-boot.version>1.5.6.RELEASE</spring-boot.version>
-        <spring.security.version>4.2.3.RELEASE</spring.security.version>
+        <spring-boot-plugin.version>2.7.18</spring-boot-plugin.version>
+        <spring-boot.version>2.7.18</spring-boot.version>
+        <spring.security.version>5.3.5.RELEASE</spring.security.version>
         <postgresql.version>9.4-1201-jdbc41</postgresql.version>
-        <keycloak.version>3.2.1.Final</keycloak.version>
+        <keycloak.version>19.0.3</keycloak.version>
 
         <!-- Docker & Fabric8 Configs -->
         <docker.from>registry.okina.fr/okina/java-base-image</docker.from>
@@ -66,20 +66,22 @@
         <docker.port.container.jolokia>8778</docker.port.container.jolokia>
         <jackson-jaxrs-xml-provider.version>2.9.0</jackson-jaxrs-xml-provider.version>
 
-        <flyway-core.version>4.2.0</flyway-core.version>
+
+        <flyway-core.version>8.5.10</flyway-core.version>
         <httpcomponents-fluent.version>4.5.3</httpcomponents-fluent.version>
         <assertj-core.version>3.8.0</assertj-core.version>
         <rest-assured.version>2.9.0</rest-assured.version>
         <geodb.version>0.8</geodb.version>
         <geotools.version>17.2</geotools.version>
-        <hibernate-spatial.version>5.1.9.Final</hibernate-spatial.version>
+        <hibernate-spatial.version>5.6.15.Final</hibernate-spatial.version>
         <!-- Hibernate version deliberatly kept back as hazelcast cache does not support newer version-->
-        <hibernate.version>5.1.9.Final</hibernate.version>
+        <hibernate.version>5.6.15.Final</hibernate.version>
         <!-- Holding back activemq version as newest version no long support spring wired broker config-->
         <activemq.version>5.15.0</activemq.version>
         <fabric8.version>2.3.4</fabric8.version>
-        <swagger-jersey2.version>1.5.16</swagger-jersey2.version>
+        <swagger-jersey2.version>1.6.2</swagger-jersey2.version>
         <javax.jdo.jdo2-api.version>2.3-eb</javax.jdo.jdo2-api.version>
+        <javax-jms.version>2.0.1</javax-jms.version>
     </properties>
 
     <dependencyManagement>
@@ -91,19 +93,29 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <dependency>
-                <groupId>io.fabric8</groupId>
-                <artifactId>fabric8-project</artifactId>
-                <version>${fabric8.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>io.fabric8</groupId>-->
+<!--                <artifactId>fabric8-project</artifactId>-->
+<!--                <version>${fabric8.version}</version>-->
+<!--                <type>pom</type>-->
+<!--                <scope>import</scope>-->
+<!--            </dependency>-->
 
         </dependencies>
     </dependencyManagement>
 
 
     <dependencies>
+        <dependency>
+            <groupId>javax.jms</groupId>
+            <artifactId>javax.jms-api</artifactId>
+            <version>${javax-jms.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.12.5</version>
+        </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
@@ -154,6 +166,16 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.tomcat.embed</groupId>
+                    <artifactId>tomcat-embed-el</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -187,12 +209,26 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId> keycloak-tomcat-adapter</artifactId>
+            <version>17.0.0</version> <!-- Ou la version appropriée que vous utilisez -->
+        </dependency>
+
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
             <exclusions>
                 <exclusion><groupId>org.hibernate</groupId>
+                    <artifactId>hibernate-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.tomcat</groupId>
+                    <artifactId>tomcat-jdbc</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.hibernate</groupId>
                     <artifactId>hibernate-core</artifactId>
                 </exclusion>
 
@@ -241,7 +277,7 @@
         <dependency>
             <groupId>org.wololo</groupId>
             <artifactId>jts2geojson</artifactId>
-            <version>0.11.0</version>
+            <version>0.18.1</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -286,15 +322,15 @@
             <artifactId>gt-geojson</artifactId>
             <version>${geotools.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.keycloak</groupId>
-            <artifactId>keycloak-tomcat8-adapter</artifactId>
-            <version>${keycloak.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>org.keycloak</groupId>
-            <artifactId>keycloak-spring-boot-adapter</artifactId>
+            <artifactId>keycloak-spring-security-adapter</artifactId>
+            <version>${keycloak.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-spring-boot-2-adapter</artifactId>
             <version>${keycloak.version}</version>
         </dependency>
 
@@ -307,6 +343,12 @@
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+            <version>2.3.2</version>
+        </dependency>
+
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -418,6 +460,14 @@
                             </build>
                         </image>
                     </images>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
             </plugin>
         </plugins>

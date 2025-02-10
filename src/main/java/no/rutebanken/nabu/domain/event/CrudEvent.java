@@ -15,10 +15,13 @@
 
 package no.rutebanken.nabu.domain.event;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.locationtech.jts.geom.Geometry;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+
 
 /**
  * Event representing creation, update or removal of an entity.
@@ -48,7 +51,7 @@ public class CrudEvent extends Event {
     private String newValue;
 
     @Basic(fetch = FetchType.LAZY)
-    @Column(columnDefinition = "geometry")
+    @Column(columnDefinition = "geometry(Point,4326)")
     private Geometry geometry;
 
     private String comment;

@@ -38,11 +38,16 @@ public class CrudEventListener {
 
     @JmsListener(destination = "CrudEventQueue")
     public void processMessage(String content) {
-        CrudEventDTO dto = CrudEventDTO.fromString(content);
+        try {
+            CrudEventDTO dto = CrudEventDTO.fromString(content);
 
-        Event event = eventMapper.toCrudEvent(dto);
-        logger.info("Received crud event: " + event);
-        eventService.addEvent(event);
+            Event event = eventMapper.toCrudEvent(dto);
+            logger.info("Received crud event: " + event);
+            eventService.addEvent(event);
+        }catch(Exception e) {
+            logger.error("error while saving crudevent. original message:" + content, e);
+            throw e;
+        }
     }
 
 
