@@ -21,8 +21,8 @@ import no.rutebanken.nabu.domain.event.CrudEventSearch;
 import no.rutebanken.nabu.domain.event.JobEvent;
 import no.rutebanken.nabu.domain.event.JobState;
 import no.rutebanken.nabu.domain.event.TimeTableAction;
-import org.junit.Assert;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;
@@ -32,6 +32,8 @@ import java.util.Collection;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EventRepositoryImplTest extends BaseIntegrationTest {
 
@@ -94,8 +96,8 @@ public class EventRepositoryImplTest extends BaseIntegrationTest {
 
 
         List<JobEvent> statusList = repository.getLatestTimetableFileTransfer(3l);
-        Assert.assertEquals(2, statusList.size());
-        Assert.assertTrue(statusList.containsAll(Arrays.asList(s1, s2)));
+       assertEquals(2, statusList.size());
+       assertTrue(statusList.containsAll(Arrays.asList(s1, s2)));
     }
 
 
@@ -110,8 +112,8 @@ public class EventRepositoryImplTest extends BaseIntegrationTest {
 
         repository.clearAll(JobEvent.JobDomain.TIMETABLE.toString());
 
-        Assert.assertTrue(repository.findTimetableJobEvents(Arrays.asList(3L), null, null, null, null, null, null).isEmpty());
-        Assert.assertTrue(repository.findTimetableJobEvents(Arrays.asList(4L), null, null, null, null, null, null).isEmpty());
+       assertTrue(repository.findTimetableJobEvents(Arrays.asList(3L), null, null, null, null, null, null).isEmpty());
+       assertTrue(repository.findTimetableJobEvents(Arrays.asList(4L), null, null, null, null, null, null).isEmpty());
     }
 
     @Test
@@ -125,8 +127,8 @@ public class EventRepositoryImplTest extends BaseIntegrationTest {
 
         repository.clear(JobEvent.JobDomain.TIMETABLE.toString(), 3L);
 
-        Assert.assertTrue(repository.findTimetableJobEvents(Arrays.asList(3L), null, null, null, null, null, null).isEmpty());
-        Assert.assertEquals(1, repository.findTimetableJobEvents(Arrays.asList(4L), null, null, null, null, null, null).size());
+       assertTrue(repository.findTimetableJobEvents(Arrays.asList(3L), null, null, null, null, null, null).isEmpty());
+       assertEquals(1, repository.findTimetableJobEvents(Arrays.asList(4L), null, null, null, null, null, null).size());
     }
 
     @Test
@@ -138,7 +140,7 @@ public class EventRepositoryImplTest extends BaseIntegrationTest {
         CrudEventSearch search = new CrudEventSearch(crudEvent.getUsername(), crudEvent.getEntityType(), crudEvent.getEntityClassifier(), crudEvent.getAction(), crudEvent.getExternalId(), crudEvent.getEventTime().minusSeconds(20), Instant.now());
 
         List<CrudEvent> crudEvents = repository.findCrudEvents(search);
-        Assert.assertEquals(1, crudEvents.size());
-        Assert.assertEquals(savedCrudEvent.getPk(), crudEvents.get(0).getPk());
+       assertEquals(1, crudEvents.size());
+       assertEquals(savedCrudEvent.getPk(), crudEvents.get(0).getPk());
     }
 }

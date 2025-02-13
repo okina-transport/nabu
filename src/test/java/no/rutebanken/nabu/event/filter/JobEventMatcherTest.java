@@ -20,26 +20,29 @@ import no.rutebanken.nabu.domain.event.JobEvent;
 import no.rutebanken.nabu.domain.event.JobState;
 import no.rutebanken.nabu.event.user.dto.organisation.OrganisationDTO;
 import no.rutebanken.nabu.event.user.dto.user.EventFilterDTO;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 public class JobEventMatcherTest {
 
     @Test
     public void eventMatchingFilterWithoutOrganisationSet() {
         EventFilterDTO filter = testFilter();
-        Assert.assertTrue(new JobEventMatcher(filter).matches(matchingJobEvent(filter)));
+        assertTrue(new JobEventMatcher(filter).matches(matchingJobEvent(filter)));
     }
 
     @Test
     public void eventMatchingFilterWithOrganisationSet() {
         EventFilterDTO filter = testFilter(organisationDTO("KOK"));
         JobEvent orgSpaceEvent = matchingJobEvent(filter);
-        Assert.assertTrue(new JobEventMatcher(filter).matches(orgSpaceEvent));
+        assertTrue(new JobEventMatcher(filter).matches(orgSpaceEvent));
 
         JobEvent rbSpaceEvent = matchingJobEvent(filter);
         rbSpaceEvent.setReferential("rb_kok");
-        Assert.assertTrue(new JobEventMatcher(filter).matches(rbSpaceEvent));
+        assertTrue(new JobEventMatcher(filter).matches(rbSpaceEvent));
     }
 
     @Test
@@ -47,7 +50,7 @@ public class JobEventMatcherTest {
         EventFilterDTO filter = testFilter(organisationDTO("KOK"));
         JobEvent event = matchingJobEvent(filter);
         event.setReferential(null);
-        Assert.assertFalse(new JobEventMatcher(filter).matches(event));
+        assertFalse(new JobEventMatcher(filter).matches(event));
     }
 
 
@@ -56,7 +59,7 @@ public class JobEventMatcherTest {
         EventFilterDTO filter = testFilter(organisationDTO("KOK"));
         JobEvent event = matchingJobEvent(filter);
         event.setReferential("otherRef");
-        Assert.assertFalse(new JobEventMatcher(filter).matches(event));
+       assertFalse(new JobEventMatcher(filter).matches(event));
     }
 
 
@@ -65,7 +68,7 @@ public class JobEventMatcherTest {
         EventFilterDTO filter = testFilter();
         JobEvent event = matchingJobEvent(filter);
         event.setDomain("otherDomain");
-        Assert.assertFalse(new JobEventMatcher(filter).matches(event));
+       assertFalse(new JobEventMatcher(filter).matches(event));
     }
 
     @Test
@@ -73,7 +76,7 @@ public class JobEventMatcherTest {
         EventFilterDTO filter = testFilter();
         JobEvent event = matchingJobEvent(filter);
         event.setAction("otherAction");
-        Assert.assertFalse(new JobEventMatcher(filter).matches(event));
+       assertFalse(new JobEventMatcher(filter).matches(event));
     }
 
     @Test
@@ -81,7 +84,7 @@ public class JobEventMatcherTest {
         EventFilterDTO filter = testFilter();
         JobEvent event = matchingJobEvent(filter);
         event.setState(JobState.PENDING);
-        Assert.assertFalse(new JobEventMatcher(filter).matches(event));
+       assertFalse(new JobEventMatcher(filter).matches(event));
     }
 
     @Test
@@ -90,10 +93,10 @@ public class JobEventMatcherTest {
         filter.actions = Sets.newHashSet(EventMatcher.ALL_TYPES);
         JobEvent event = matchingJobEvent(filter);
 
-        Assert.assertTrue(new JobEventMatcher(filter).matches(event));
+       assertTrue(new JobEventMatcher(filter).matches(event));
 
         event.setAction("randomAction");
-        Assert.assertTrue(new JobEventMatcher(filter).matches(event));
+       assertTrue(new JobEventMatcher(filter).matches(event));
     }
 
     private JobEvent matchingJobEvent(EventFilterDTO filter) {

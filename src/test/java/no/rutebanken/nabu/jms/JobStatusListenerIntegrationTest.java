@@ -24,9 +24,11 @@ import no.rutebanken.nabu.event.user.UserRepository;
 import no.rutebanken.nabu.jms.dto.JobEventDTO;
 import no.rutebanken.nabu.repository.EventRepository;
 import no.rutebanken.nabu.repository.SystemJobStatusRepository;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+
+
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -34,6 +36,7 @@ import org.springframework.data.domain.Example;
 import java.time.Instant;
 import java.util.ArrayList;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 public class JobStatusListenerIntegrationTest extends BaseIntegrationTest {
@@ -53,7 +56,7 @@ public class JobStatusListenerIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private UserNotificationEventHandler userNotificationEventHandler;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         userNotificationEventHandler.setUserRepository(userRepositoryMock);
         when(userRepositoryMock.findAll()).thenReturn(new ArrayList<>());
@@ -82,11 +85,11 @@ public class JobStatusListenerIntegrationTest extends BaseIntegrationTest {
         assertSystemJobStatus(firstPendingEvent);
 
 
-        Assert.assertEquals(4, eventRepository.findAll().size());
+       assertEquals(4, eventRepository.findAll().size());
 
         JobEvent queryEvent = JobEvent.builder().domain(firstPendingEvent.domain).build();
         queryEvent.setRegisteredTime(null);
-        Assert.assertEquals(4, eventRepository.findAll(Example.of(queryEvent)).size());
+       assertEquals(4, eventRepository.findAll(Example.of(queryEvent)).size());
 
     }
 
@@ -94,8 +97,8 @@ public class JobStatusListenerIntegrationTest extends BaseIntegrationTest {
         SystemJobStatus systemJobStatus = systemJobStatusRepository.findByJobDomainAndActionAndState(jobEvent.domain,
                 jobEvent.action, jobEvent.state);
 
-        Assert.assertEquals(jobEvent.eventTime, systemJobStatus.getLastStatusTime());
-        Assert.assertEquals(jobEvent.state, systemJobStatus.getState());
+       assertEquals(jobEvent.eventTime, systemJobStatus.getLastStatusTime());
+       assertEquals(jobEvent.state, systemJobStatus.getState());
     }
 
     protected JobEventDTO createEvent(JobState state, Instant time) {

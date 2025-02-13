@@ -22,11 +22,13 @@ import no.rutebanken.nabu.domain.event.JobEvent;
 import no.rutebanken.nabu.domain.event.JobState;
 import no.rutebanken.nabu.domain.event.Notification;
 import no.rutebanken.nabu.provider.model.Provider;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.FileNotFoundException;
@@ -37,7 +39,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-@RunWith(SpringRunner.class)
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.util.AssertionErrors.assertFalse;
+
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = NabuTestApp.class)
 public class EmailNotificationFormatterTest {
 
@@ -54,11 +59,11 @@ public class EmailNotificationFormatterTest {
         PrintWriter out = new PrintWriter("target/email.html");
         out.write(msg);
         out.close();
-        Assert.assertTrue(msg.startsWith("<html>"));
-        Assert.assertFalse("Expected all message keys to have been resolved", msg.contains("notification.email"));
-        Assert.assertTrue(msg.contains("hendelser"));   // TODO norwegian still missing lots of values. How do we verify?
+       assertTrue(msg.startsWith("<html>"));
+       assertFalse("Expected all message keys to have been resolved", msg.contains("notification.email"));
+       assertTrue(msg.contains("hendelser"));   // TODO norwegian still missing lots of values. How do we verify?
 
-        Assert.assertTrue("Should be able to map providerId to name", msg.contains(providerList.get(0).getName()));
+       assertTrue(msg.contains(providerList.get(0).getName()), "Should be able to map providerId to name");
     }
 
     @Test
@@ -74,11 +79,11 @@ public class EmailNotificationFormatterTest {
 
         String msg = emailNotificationFormatter.formatMessage(notifications, new Locale("en"), providerList);
         System.out.println(msg);
-        Assert.assertTrue(msg.startsWith("<html>"));
-        Assert.assertFalse("Expected all message keys to have been resolved", msg.contains("notification.email"));
-        Assert.assertTrue(msg.contains("Too many events have been registered in the period (6). Only the 5 newest events are included"));
+       assertTrue(msg.startsWith("<html>"));
+       assertFalse("Expected all message keys to have been resolved", msg.contains("notification.email"));
+       assertTrue(msg.contains("Too many events have been registered in the period (6). Only the 5 newest events are included"));
 
-        Assert.assertFalse("Expected oldest event to be omitted", msg.contains(oldestEvent.getEvent().getName()));
+       assertFalse("Expected oldest event to be omitted", msg.contains(oldestEvent.getEvent().getName()));
     }
 
 

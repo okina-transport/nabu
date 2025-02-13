@@ -19,8 +19,8 @@ package no.rutebanken.nabu.rest;
 import no.rutebanken.nabu.domain.SystemJobStatus;
 import no.rutebanken.nabu.domain.event.JobState;
 import no.rutebanken.nabu.rest.domain.SystemStatusAggregation;
-import org.junit.Assert;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -28,13 +28,16 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class AdminSummaryResourceTest {
 
 	@Test
 	public void testConvertToSystemStatusAggregationEmptyCollection() {
 		AdminSummaryResource resource = new AdminSummaryResource();
 		Collection<SystemStatusAggregation> aggregations = resource.convertToSystemStatusAggregation(new ArrayList<>());
-		Assert.assertTrue(aggregations.isEmpty());
+		assertTrue(aggregations.isEmpty());
 	}
 
 	@Test
@@ -51,18 +54,18 @@ public class AdminSummaryResourceTest {
 		statusList.add(new SystemJobStatus("job2", "", JobState.OK, now.plusMillis(1)));
 
 		Collection<SystemStatusAggregation> aggregations = resource.convertToSystemStatusAggregation(statusList);
-		Assert.assertEquals(aggregations.size(), 2);
+		assertEquals(aggregations.size(), 2);
 
 		SystemStatusAggregation agg1 = findAgg(aggregations, "job1");
-		Assert.assertEquals(JobState.STARTED, agg1.currentState);
-		Assert.assertEquals(Date.from(now.plusMillis(5)), agg1.currentStateDate);
-		Assert.assertEquals(Date.from(now.plusMillis(3)), agg1.latestDatePerState.get(JobState.FAILED));
+		assertEquals(JobState.STARTED, agg1.currentState);
+		assertEquals(Date.from(now.plusMillis(5)), agg1.currentStateDate);
+		assertEquals(Date.from(now.plusMillis(3)), agg1.latestDatePerState.get(JobState.FAILED));
 
 
 		SystemStatusAggregation agg2 = findAgg(aggregations, "job2");
-		Assert.assertEquals(JobState.OK, agg2.currentState);
-		Assert.assertEquals(Date.from(now.plusMillis(1)), agg2.currentStateDate);
-		Assert.assertEquals(Date.from(now.plusMillis(1)), agg2.latestDatePerState.get(JobState.OK));
+		assertEquals(JobState.OK, agg2.currentState);
+		assertEquals(Date.from(now.plusMillis(1)), agg2.currentStateDate);
+		assertEquals(Date.from(now.plusMillis(1)), agg2.latestDatePerState.get(JobState.OK));
 
 	}
 
