@@ -33,7 +33,7 @@ import java.util.Date;
 public abstract class Event implements Comparable<Event> {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "event_seq")
     private Long pk;
 
     @NotNull
