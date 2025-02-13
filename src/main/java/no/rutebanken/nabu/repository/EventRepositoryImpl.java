@@ -246,5 +246,15 @@ public class EventRepositoryImpl extends SimpleJpaRepository<Event, Long> implem
                 .executeUpdate();
     }
 
+    @Override
+    public void clearJobEvents(String domain) {
+        this.entityManager.createQuery("delete from JobEvent je where je.domain=:domain").setParameter("domain", domain).executeUpdate();
+    }
+
+    @Override
+    public void clearJobEvents(String domain, Long providerId) {
+        this.entityManager.createQuery("delete from JobEvent je where je.domain=:domain and je.providerId=:providerId").setParameter("domain", domain).setParameter("providerId", providerId).executeUpdate();
+    }
+
 
 }

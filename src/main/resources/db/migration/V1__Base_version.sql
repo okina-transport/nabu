@@ -5,37 +5,37 @@
 -- Dumped from database version 9.5.2
 -- Dumped by pg_dump version 9.5.2
 
---
--- SET lock_timeout = 0;
--- SET client_encoding = 'UTF8';
--- SET standard_conforming_strings = on;
--- SET check_function_bodies = false;
--- SET client_min_messages = warning;
--- SET row_security = off;
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+SET row_security = off;
 
 --
--- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner:
 --
 
 CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 
 
 --
--- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner:
 --
 
 -- COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 
 --
--- Name: postgis; Type: EXTENSION; Schema: -; Owner: 
+-- Name: postgis; Type: EXTENSION; Schema: -; Owner:
 --
 
 CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;
 
 
 --
--- Name: EXTENSION postgis; Type: COMMENT; Schema: -; Owner: 
+-- Name: EXTENSION postgis; Type: COMMENT; Schema: -; Owner:
 --
 
 -- COMMENT ON EXTENSION postgis IS 'PostGIS geometry, geography, and raster spatial types and functions';
@@ -52,27 +52,27 @@ SET default_with_oids = false;
 --
 
 CREATE TABLE event (
-    dtype character varying(31) NOT NULL,
-    pk bigint NOT NULL,
-    action character varying(255) NOT NULL,
-    correlation_id character varying(255),
-    event_time timestamp without time zone NOT NULL,
-    external_id character varying(255),
-    name character varying(255),
-    registered_time timestamp without time zone NOT NULL,
-    username character varying(255),
-    change_type character varying(255),
-    comment character varying(255),
-    entity_classifier character varying(255),
-    entity_type character varying(255),
-    geometry geometry,
-    new_value character varying(255),
-    old_value character varying(255),
-    version bigint,
-    domain character varying(255),
-    provider_id bigint,
-    referential character varying(255),
-    state integer
+                       dtype character varying(31) NOT NULL,
+                       pk bigint NOT NULL,
+                       action character varying(255) NOT NULL,
+                       correlation_id character varying(255),
+                       event_time timestamp without time zone NOT NULL,
+                       external_id character varying(255),
+                       name character varying(255),
+                       registered_time timestamp without time zone NOT NULL,
+                       username character varying(255),
+                       change_type character varying(255),
+                       comment character varying(255),
+                       entity_classifier character varying(255),
+                       entity_type character varying(255),
+                       geometry geometry,
+                       new_value character varying(255),
+                       old_value character varying(255),
+                       version bigint,
+                       domain character varying(255),
+                       provider_id bigint,
+                       referential character varying(255),
+                       state integer
 );
 
 
@@ -97,11 +97,11 @@ ALTER TABLE hibernate_sequence OWNER TO nabu;
 --
 
 CREATE TABLE notification (
-    pk bigint NOT NULL,
-    status integer,
-    type integer,
-    user_name character varying(255),
-    event_pk bigint
+                              pk bigint NOT NULL,
+                              status integer,
+                              type integer,
+                              user_name character varying(255),
+                              event_pk bigint
 );
 
 
@@ -112,10 +112,10 @@ ALTER TABLE notification OWNER TO nabu;
 --
 
 CREATE TABLE qrtz_blob_triggers (
-    sched_name character varying(120) NOT NULL,
-    trigger_name character varying(200) NOT NULL,
-    trigger_group character varying(200) NOT NULL,
-    blob_data bytea
+                                    sched_name character varying(120) NOT NULL,
+                                    trigger_name character varying(200) NOT NULL,
+                                    trigger_group character varying(200) NOT NULL,
+                                    blob_data bytea
 );
 
 
@@ -126,9 +126,9 @@ ALTER TABLE qrtz_blob_triggers OWNER TO nabu;
 --
 
 CREATE TABLE qrtz_calendars (
-    sched_name character varying(120) NOT NULL,
-    calendar_name character varying(200) NOT NULL,
-    calendar bytea NOT NULL
+                                sched_name character varying(120) NOT NULL,
+                                calendar_name character varying(200) NOT NULL,
+                                calendar bytea NOT NULL
 );
 
 
@@ -139,11 +139,11 @@ ALTER TABLE qrtz_calendars OWNER TO nabu;
 --
 
 CREATE TABLE qrtz_cron_triggers (
-    sched_name character varying(120) NOT NULL,
-    trigger_name character varying(200) NOT NULL,
-    trigger_group character varying(200) NOT NULL,
-    cron_expression character varying(120) NOT NULL,
-    time_zone_id character varying(80)
+                                    sched_name character varying(120) NOT NULL,
+                                    trigger_name character varying(200) NOT NULL,
+                                    trigger_group character varying(200) NOT NULL,
+                                    cron_expression character varying(120) NOT NULL,
+                                    time_zone_id character varying(80)
 );
 
 
@@ -154,19 +154,19 @@ ALTER TABLE qrtz_cron_triggers OWNER TO nabu;
 --
 
 CREATE TABLE qrtz_fired_triggers (
-    sched_name character varying(120) NOT NULL,
-    entry_id character varying(95) NOT NULL,
-    trigger_name character varying(200) NOT NULL,
-    trigger_group character varying(200) NOT NULL,
-    instance_name character varying(200) NOT NULL,
-    fired_time bigint NOT NULL,
-    sched_time bigint NOT NULL,
-    priority integer NOT NULL,
-    state character varying(16) NOT NULL,
-    job_name character varying(200),
-    job_group character varying(200),
-    is_nonconcurrent boolean,
-    requests_recovery boolean
+                                     sched_name character varying(120) NOT NULL,
+                                     entry_id character varying(95) NOT NULL,
+                                     trigger_name character varying(200) NOT NULL,
+                                     trigger_group character varying(200) NOT NULL,
+                                     instance_name character varying(200) NOT NULL,
+                                     fired_time bigint NOT NULL,
+                                     sched_time bigint NOT NULL,
+                                     priority integer NOT NULL,
+                                     state character varying(16) NOT NULL,
+                                     job_name character varying(200),
+                                     job_group character varying(200),
+                                     is_nonconcurrent boolean,
+                                     requests_recovery boolean
 );
 
 
@@ -177,16 +177,16 @@ ALTER TABLE qrtz_fired_triggers OWNER TO nabu;
 --
 
 CREATE TABLE qrtz_job_details (
-    sched_name character varying(120) NOT NULL,
-    job_name character varying(200) NOT NULL,
-    job_group character varying(200) NOT NULL,
-    description character varying(250),
-    job_class_name character varying(250) NOT NULL,
-    is_durable boolean NOT NULL,
-    is_nonconcurrent boolean NOT NULL,
-    is_update_data boolean NOT NULL,
-    requests_recovery boolean NOT NULL,
-    job_data bytea
+                                  sched_name character varying(120) NOT NULL,
+                                  job_name character varying(200) NOT NULL,
+                                  job_group character varying(200) NOT NULL,
+                                  description character varying(250),
+                                  job_class_name character varying(250) NOT NULL,
+                                  is_durable boolean NOT NULL,
+                                  is_nonconcurrent boolean NOT NULL,
+                                  is_update_data boolean NOT NULL,
+                                  requests_recovery boolean NOT NULL,
+                                  job_data bytea
 );
 
 
@@ -197,8 +197,8 @@ ALTER TABLE qrtz_job_details OWNER TO nabu;
 --
 
 CREATE TABLE qrtz_locks (
-    sched_name character varying(120) NOT NULL,
-    lock_name character varying(40) NOT NULL
+                            sched_name character varying(120) NOT NULL,
+                            lock_name character varying(40) NOT NULL
 );
 
 
@@ -209,8 +209,8 @@ ALTER TABLE qrtz_locks OWNER TO nabu;
 --
 
 CREATE TABLE qrtz_paused_trigger_grps (
-    sched_name character varying(120) NOT NULL,
-    trigger_group character varying(200) NOT NULL
+                                          sched_name character varying(120) NOT NULL,
+                                          trigger_group character varying(200) NOT NULL
 );
 
 
@@ -221,10 +221,10 @@ ALTER TABLE qrtz_paused_trigger_grps OWNER TO nabu;
 --
 
 CREATE TABLE qrtz_scheduler_state (
-    sched_name character varying(120) NOT NULL,
-    instance_name character varying(200) NOT NULL,
-    last_checkin_time bigint NOT NULL,
-    checkin_interval bigint NOT NULL
+                                      sched_name character varying(120) NOT NULL,
+                                      instance_name character varying(200) NOT NULL,
+                                      last_checkin_time bigint NOT NULL,
+                                      checkin_interval bigint NOT NULL
 );
 
 
@@ -235,12 +235,12 @@ ALTER TABLE qrtz_scheduler_state OWNER TO nabu;
 --
 
 CREATE TABLE qrtz_simple_triggers (
-    sched_name character varying(120) NOT NULL,
-    trigger_name character varying(200) NOT NULL,
-    trigger_group character varying(200) NOT NULL,
-    repeat_count bigint NOT NULL,
-    repeat_interval bigint NOT NULL,
-    times_triggered bigint NOT NULL
+                                      sched_name character varying(120) NOT NULL,
+                                      trigger_name character varying(200) NOT NULL,
+                                      trigger_group character varying(200) NOT NULL,
+                                      repeat_count bigint NOT NULL,
+                                      repeat_interval bigint NOT NULL,
+                                      times_triggered bigint NOT NULL
 );
 
 
@@ -251,20 +251,20 @@ ALTER TABLE qrtz_simple_triggers OWNER TO nabu;
 --
 
 CREATE TABLE qrtz_simprop_triggers (
-    sched_name character varying(120) NOT NULL,
-    trigger_name character varying(200) NOT NULL,
-    trigger_group character varying(200) NOT NULL,
-    str_prop_1 character varying(512),
-    str_prop_2 character varying(512),
-    str_prop_3 character varying(512),
-    int_prop_1 integer,
-    int_prop_2 integer,
-    long_prop_1 bigint,
-    long_prop_2 bigint,
-    dec_prop_1 numeric(13,4),
-    dec_prop_2 numeric(13,4),
-    bool_prop_1 boolean,
-    bool_prop_2 boolean
+                                       sched_name character varying(120) NOT NULL,
+                                       trigger_name character varying(200) NOT NULL,
+                                       trigger_group character varying(200) NOT NULL,
+                                       str_prop_1 character varying(512),
+                                       str_prop_2 character varying(512),
+                                       str_prop_3 character varying(512),
+                                       int_prop_1 integer,
+                                       int_prop_2 integer,
+                                       long_prop_1 bigint,
+                                       long_prop_2 bigint,
+                                       dec_prop_1 numeric(13,4),
+                                       dec_prop_2 numeric(13,4),
+                                       bool_prop_1 boolean,
+                                       bool_prop_2 boolean
 );
 
 
@@ -275,22 +275,22 @@ ALTER TABLE qrtz_simprop_triggers OWNER TO nabu;
 --
 
 CREATE TABLE qrtz_triggers (
-    sched_name character varying(120) NOT NULL,
-    trigger_name character varying(200) NOT NULL,
-    trigger_group character varying(200) NOT NULL,
-    job_name character varying(200) NOT NULL,
-    job_group character varying(200) NOT NULL,
-    description character varying(250),
-    next_fire_time bigint,
-    prev_fire_time bigint,
-    priority integer,
-    trigger_state character varying(16) NOT NULL,
-    trigger_type character varying(8) NOT NULL,
-    start_time bigint NOT NULL,
-    end_time bigint,
-    calendar_name character varying(200),
-    misfire_instr smallint,
-    job_data bytea
+                               sched_name character varying(120) NOT NULL,
+                               trigger_name character varying(200) NOT NULL,
+                               trigger_group character varying(200) NOT NULL,
+                               job_name character varying(200) NOT NULL,
+                               job_group character varying(200) NOT NULL,
+                               description character varying(250),
+                               next_fire_time bigint,
+                               prev_fire_time bigint,
+                               priority integer,
+                               trigger_state character varying(16) NOT NULL,
+                               trigger_type character varying(8) NOT NULL,
+                               start_time bigint NOT NULL,
+                               end_time bigint,
+                               calendar_name character varying(200),
+                               misfire_instr smallint,
+                               job_data bytea
 );
 
 
@@ -321,11 +321,11 @@ ALTER TABLE qrtz_triggers OWNER TO nabu;
 --
 
 CREATE TABLE system_job_status (
-    pk bigint NOT NULL,
-    action character varying(255),
-    job_domain character varying(255),
-    last_status_time timestamp without time zone,
-    state integer
+                                   pk bigint NOT NULL,
+                                   action character varying(255),
+                                   job_domain character varying(255),
+                                   last_status_time timestamp without time zone,
+                                   state integer
 );
 
 

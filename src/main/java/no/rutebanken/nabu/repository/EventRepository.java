@@ -45,4 +45,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     void deleteAllByPk (List<Long> ids);
 
+    void clearJobEvents(String domain);
+
+    void clearJobEvents(String domain, Long providerId);
+
 }
