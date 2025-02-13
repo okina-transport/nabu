@@ -1,7 +1,8 @@
 FROM openjdk:11
 
 ARG JAR_FILE
-COPY ${JAR_FILE} /deployments/nabu.jar
+ARG VERSION
+COPY ${JAR_FILE} /deployments/nabu-${VERSION}.jar
 
 
 # Définition de l'encodage de l'environnement à UTF-8
