@@ -1,7 +1,7 @@
 FROM openjdk:11
 
 ARG JAR_FILE
-COPY ${JAR_FILE} app.jar
+COPY ${JAR_FILE} /deployments/${JAR_FILE}.jar
 
 
 # Définition de l'encodage de l'environnement à UTF-8
