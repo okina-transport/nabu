@@ -44,6 +44,9 @@ public class JobStatusEvent {
     @JsonProperty("name")
     public String name;
 
+    @JsonProperty("description")
+    public String description;
+
 
     public JobStatusEvent(String action, State state, Date date, Long chouetteJobId, String referential, String type, String name) {
         this.action = action;
@@ -57,8 +60,10 @@ public class JobStatusEvent {
 
     public static JobStatusEvent createFromJobEvent(JobEvent e) {
         Long chouetteId = e.getExternalId() == null ? null : Long.parseLong(e.getExternalId());
-        return new JobStatusEvent(e.getAction(),
-                                         JobStatus.State.valueOf(e.getState().name()), Date.from(e.getEventTime()), chouetteId
-                                         , e.getReferential(), e.getType(), e.getName());
+        JobStatusEvent jobStatusEvent = new JobStatusEvent(e.getAction(),
+                State.valueOf(e.getState().name()), Date.from(e.getEventTime()), chouetteId
+                , e.getReferential(), e.getType(), e.getName());
+        jobStatusEvent.description = e.getDescription();
+        return jobStatusEvent;
     }
 }
