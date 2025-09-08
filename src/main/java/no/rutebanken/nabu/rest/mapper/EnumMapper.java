@@ -23,6 +23,10 @@ import java.util.List;
 
 public class EnumMapper {
 
+    private EnumMapper() {
+        throw new IllegalStateException("Utility class");
+    }
+
 	public static <T extends Enum<T>, O extends Enum<O>> List<T> convertEnums(List<O> org, Class<T> toEnum) {
 		List<T> converted = new ArrayList<>();
 		if (!CollectionUtils.isEmpty(org)) {

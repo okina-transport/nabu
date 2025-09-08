@@ -15,10 +15,10 @@
 
 package no.rutebanken.nabu.domain.event;
 
-import com.vividsolutions.jts.geom.Geometry;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import org.locationtech.jts.geom.Geometry;
 
 /**
  * Event representing creation, update or removal of an entity.

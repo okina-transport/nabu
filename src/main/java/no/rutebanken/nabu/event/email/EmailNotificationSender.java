@@ -23,7 +23,6 @@ import no.rutebanken.nabu.event.user.dto.user.UserDTO;
 import no.rutebanken.nabu.repository.NotificationRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -38,15 +37,13 @@ import java.util.Set;
 @Service
 public class EmailNotificationSender implements NotificationProcessor {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
-    @Autowired
-    private NotificationRepository notificationRepository;
+    private static final Logger logger = LoggerFactory.getLogger(EmailNotificationSender.class);
 
-    @Autowired
-    private EmailNotificationFormatter formatter;
+    private final NotificationRepository notificationRepository;
 
-    @Autowired
-    private JavaMailSender mailSender;
+    private final EmailNotificationFormatter formatter;
+
+    private final JavaMailSender mailSender;
 
     @Value("${notification.email.from:varsel@entur.no}")
     private String emailFrom;
@@ -58,23 +55,29 @@ public class EmailNotificationSender implements NotificationProcessor {
     @Value("${notification.email.enabled:true}")
     private boolean emailEnabled;
 
+    public EmailNotificationSender(NotificationRepository notificationRepository, EmailNotificationFormatter formatter, JavaMailSender mailSender) {
+        this.notificationRepository = notificationRepository;
+        this.formatter = formatter;
+        this.mailSender = mailSender;
+    }
+
     @Override
     public void processNotificationsForUser(UserDTO user, Set<Notification> notifications) {
 
         if (user.getContactDetails() == null || user.getContactDetails().getEmail() == null) {
-            logger.warn("Unable to notify user without registered email address: " + user.getUsername() + ". Discarding notifications: " + notifications);
-            notificationRepository.delete(notifications);
+            logger.warn("Unable to notify user without registered email address: {}. Discarding notifications: {}", user.getUsername(), notifications);
+            notificationRepository.deleteAll(notifications);
             return;
         }
 
-        logger.info("Sending email to user: " + user.getUsername() + " for notifications: " + notifications);
+        logger.info("Sending email to user: {} for notifications: {}", user.getUsername(), notifications);
 
-        Locale locale = new Locale(emailLanguageDefault); // TODO get users default from user
+        Locale locale = Locale.of(emailLanguageDefault); // TODO get users default from user
 
         sendEmail(user.getContactDetails().getEmail(), formatter.getSubject(locale), formatter.formatMessage(notifications, locale));
 
         notifications.forEach(n -> n.setStatus(Notification.NotificationStatus.COMPLETE));
-        notificationRepository.save(notifications);
+        notificationRepository.saveAll(notifications);
     }
 
     protected void sendEmail(String to, String subject, String msg) {
@@ -87,7 +90,7 @@ public class EmailNotificationSender implements NotificationProcessor {
                 helper.setFrom(emailFrom);
             });
         } else {
-            logger.warn("Email disabled, not sending: " + msg);
+            logger.warn("Email disabled, not sending: {}", msg);
         }
     }
 

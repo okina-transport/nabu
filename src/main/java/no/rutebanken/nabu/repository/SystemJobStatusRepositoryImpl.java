@@ -15,17 +15,16 @@
 
 package no.rutebanken.nabu.repository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import no.rutebanken.nabu.domain.SystemJobStatus;
 import no.rutebanken.nabu.domain.event.JobState;
 import org.hibernate.annotations.QueryHints;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,10 +33,9 @@ import java.util.Map;
 @Transactional
 public class SystemJobStatusRepositoryImpl extends SimpleJpaRepository<SystemJobStatus, Long> implements SystemJobStatusRepository {
 
+    private final EntityManager entityManager;
 
-    private EntityManager entityManager;
-
-    public SystemJobStatusRepositoryImpl(@Autowired EntityManager em) {
+    public SystemJobStatusRepositoryImpl(EntityManager em) {
         super(SystemJobStatus.class, em);
         entityManager = em;
     }
@@ -63,9 +61,9 @@ public class SystemJobStatusRepositoryImpl extends SimpleJpaRepository<SystemJob
             firstCrit = false;
         }
 
-        TypedQuery query = entityManager.createQuery(jpql.toString(), SystemJobStatus.class);
+        TypedQuery<SystemJobStatus> query = entityManager.createQuery(jpql.toString(), SystemJobStatus.class);
         query.setHint(QueryHints.CACHEABLE, Boolean.TRUE);
-        parameters.forEach((key, value) -> query.setParameter(key, value));
+        parameters.forEach(query::setParameter);
         return query.getResultList();
     }
 
@@ -77,11 +75,4 @@ public class SystemJobStatusRepositoryImpl extends SimpleJpaRepository<SystemJob
                        .setParameter("state", state).setHint(QueryHints.CACHEABLE, Boolean.TRUE).getSingleResult();
     }
 
-    public EntityManager getEntityManager() {
-        return entityManager;
-    }
-
-    public void setEntityManager(EntityManager entityManager) {
-        this.entityManager = entityManager;
-    }
 }

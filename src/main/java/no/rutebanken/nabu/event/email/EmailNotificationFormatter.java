@@ -16,28 +16,17 @@
 package no.rutebanken.nabu.event.email;
 
 import freemarker.template.Configuration;
-
 import no.rutebanken.nabu.domain.event.CrudEvent;
 import no.rutebanken.nabu.domain.event.JobEvent;
 import no.rutebanken.nabu.domain.event.Notification;
 import no.rutebanken.nabu.provider.ProviderRepository;
 import no.rutebanken.nabu.provider.model.Provider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -47,15 +36,11 @@ import java.util.stream.Collectors;
 @Service
 public class EmailNotificationFormatter {
 
-    @Autowired
-    private ProviderRepository providerRepository;
+    private final ProviderRepository providerRepository;
 
+    private final MessageSource messageSource;
 
-    @Autowired
-    private MessageSource messageSource;
-
-    @Autowired
-    private Configuration freemarkerConfiguration;
+    private final Configuration freemarkerConfiguration;
 
     @Value("${email.link.operator:https://operator.rutebanken.org/}")
     private String operatorLink;
@@ -66,6 +51,12 @@ public class EmailNotificationFormatter {
 
     @Value("${notification.email.max.length:200}")
     private int emailNotificationMaxEvents;
+
+    public EmailNotificationFormatter(ProviderRepository providerRepository, MessageSource messageSource, Configuration freemarkerConfiguration) {
+        this.providerRepository = providerRepository;
+        this.messageSource = messageSource;
+        this.freemarkerConfiguration = freemarkerConfiguration;
+    }
 
 
     public String getSubject(Locale locale) {

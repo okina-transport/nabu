@@ -16,28 +16,26 @@
 package no.rutebanken.nabu.rest.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Date;
 
+@Getter
+@Setter
+@AllArgsConstructor
 public class DataDeliveryStatus {
 
     public enum State {IN_PROGRESS, FAILED, OK}
 
     @JsonProperty("state")
-    public DataDeliveryStatus.State state;
+    private DataDeliveryStatus.State state;
 
     @JsonProperty("date")
-    public Date date;
+    private Date date;
 
     @JsonProperty("fileName")
-    public String fileName;
+    private String fileName;
 
-    public DataDeliveryStatus(DataDeliveryStatus.State state, Date date, String fileName) {
-        this.state = state;
-        this.date = date;
-        this.fileName = fileName;
-    }
-
-    public DataDeliveryStatus() {
-    }
 }

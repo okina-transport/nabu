@@ -19,24 +19,23 @@ import no.rutebanken.nabu.BaseIntegrationTest;
 import no.rutebanken.nabu.domain.SystemJobStatus;
 import no.rutebanken.nabu.domain.event.JobEvent;
 import no.rutebanken.nabu.domain.event.JobState;
-import no.rutebanken.nabu.event.UserNotificationEventHandler;
 import no.rutebanken.nabu.event.user.UserRepository;
 import no.rutebanken.nabu.jms.dto.JobEventDTO;
 import no.rutebanken.nabu.repository.EventRepository;
 import no.rutebanken.nabu.repository.SystemJobStatusRepository;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.Instant;
 import java.util.ArrayList;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-public class JobStatusListenerIntegrationTest extends BaseIntegrationTest {
+class JobStatusListenerIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private JobEventListener eventListener;
@@ -47,21 +46,18 @@ public class JobStatusListenerIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private SystemJobStatusRepository systemJobStatusRepository;
 
-    @Mock
+    @MockitoBean
     private UserRepository userRepositoryMock;
 
-    @Autowired
-    private UserNotificationEventHandler userNotificationEventHandler;
 
-    @Before
-    public void setUp() throws Exception {
-        userNotificationEventHandler.setUserRepository(userRepositoryMock);
+    @BeforeEach
+    void setUp() {
         when(userRepositoryMock.findAll()).thenReturn(new ArrayList<>());
     }
 
 
     @Test
-    public void jobEventUpdatesSystemJobStatus() {
+    void jobEventUpdatesSystemJobStatus() {
         Instant now = Instant.now();
         JobEventDTO firstPendingEvent = createEvent(JobState.PENDING, now);
         eventListener.processMessage(toJson(firstPendingEvent));
@@ -81,29 +77,29 @@ public class JobStatusListenerIntegrationTest extends BaseIntegrationTest {
         eventListener.processMessage(toJson(secondPendingEvent));
         assertSystemJobStatus(firstPendingEvent);
 
+        assertThat(eventRepository.findAll()).hasSize(4);
 
-        Assert.assertEquals(4, eventRepository.findAll().size());
-
-        JobEvent queryEvent = JobEvent.builder().domain(firstPendingEvent.domain).build();
+        JobEvent queryEvent = JobEvent.builder().domain(firstPendingEvent.getDomain()).build();
         queryEvent.setRegisteredTime(null);
-        Assert.assertEquals(4, eventRepository.findAll(Example.of(queryEvent)).size());
+
+        assertThat(eventRepository.findAll(Example.of(queryEvent))).hasSize(4);
 
     }
 
     protected void assertSystemJobStatus(JobEventDTO jobEvent) {
-        SystemJobStatus systemJobStatus = systemJobStatusRepository.findByJobDomainAndActionAndState(jobEvent.domain,
-                jobEvent.action, jobEvent.state);
+        SystemJobStatus systemJobStatus = systemJobStatusRepository.findByJobDomainAndActionAndState(jobEvent.getDomain(),
+                jobEvent.getAction(), jobEvent.getState());
 
-        Assert.assertEquals(jobEvent.eventTime, systemJobStatus.getLastStatusTime());
-        Assert.assertEquals(jobEvent.state, systemJobStatus.getState());
+        assertThat(jobEvent.getEventTime()).isEqualTo(systemJobStatus.getLastStatusTime());
+        assertThat(jobEvent.getState()).isEqualTo(systemJobStatus.getState());
     }
 
     protected JobEventDTO createEvent(JobState state, Instant time) {
         JobEventDTO jobEvent = new JobEventDTO();
-        jobEvent.eventTime = time;
-        jobEvent.state = state;
-        jobEvent.action = "action";
-        jobEvent.domain = "JobStatusListener";
+        jobEvent.setEventTime(time);
+        jobEvent.setState(state);
+        jobEvent.setAction("action");
+        jobEvent.setDomain("JobStatusListener");
         return jobEvent;
     }
 

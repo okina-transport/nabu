@@ -16,6 +16,8 @@
 package no.rutebanken.nabu.event.user.dto.user;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Getter;
+import lombok.Setter;
 import no.rutebanken.nabu.domain.event.JobState;
 import no.rutebanken.nabu.event.user.dto.organisation.OrganisationDTO;
 import no.rutebanken.nabu.event.user.dto.responsibility.EntityClassificationDTO;
@@ -24,34 +26,34 @@ import java.util.HashSet;
 import java.util.Set;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Getter
+@Setter
 public class EventFilterDTO {
 
     public enum EventFilterType {JOB, CRUD}
 
 
-    public EventFilterType type;
+    private EventFilterType type;
 
-    public String organisationRef;
+    private String organisationRef;
 
     // Full objects included for ease of use, disregarded in CRUD
-    public OrganisationDTO organisation;
-
-    // TODO components/subclasses?
+    private OrganisationDTO organisation;
 
     // Job event filter values
-    public String jobDomain;
+    private String jobDomain;
 
-    public Set<String> actions = new HashSet<>();
+    private Set<String> actions = new HashSet<>();
 
-    public Set<JobState> states = new HashSet<>();
+    private Set<JobState> states = new HashSet<>();
 
     // Crud event filter values
-    public Set<String> administrativeZoneRefs = new HashSet<>();
+    private Set<String> administrativeZoneRefs = new HashSet<>();
 
-    public Set<String> entityClassificationRefs = new HashSet<>();
+    private Set<String> entityClassificationRefs = new HashSet<>();
 
     // Full objects included for ease of use, disregarded in CRUD
-    public Set<EntityClassificationDTO> entityClassifications = new HashSet<>();
+    private Set<EntityClassificationDTO> entityClassifications = new HashSet<>();
 
     public EventFilterDTO(EventFilterType type) {
         this.type = type;
@@ -91,39 +93,4 @@ public class EventFilterDTO {
         return result;
     }
 
-    public EventFilterType getType() {
-        return type;
-    }
-
-    public String getOrganisationRef() {
-        return organisationRef;
-    }
-
-    public OrganisationDTO getOrganisation() {
-        return organisation;
-    }
-
-    public String getJobDomain() {
-        return jobDomain;
-    }
-
-    public Set<String> getActions() {
-        return actions;
-    }
-
-    public Set<JobState> getStates() {
-        return states;
-    }
-
-    public Set<String> getAdministrativeZoneRefs() {
-        return administrativeZoneRefs;
-    }
-
-    public Set<String> getEntityClassificationRefs() {
-        return entityClassificationRefs;
-    }
-
-    public Set<EntityClassificationDTO> getEntityClassifications() {
-        return entityClassifications;
-    }
 }

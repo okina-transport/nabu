@@ -16,11 +16,9 @@
 package no.rutebanken.nabu.security;
 
 
-
 import no.rutebanken.nabu.provider.ProviderRepository;
 import no.rutebanken.nabu.provider.model.Provider;
 import org.rutebanken.helper.organisation.RoleAssignmentExtractor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -28,15 +26,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProviderAuthenticationService {
 
-    @Autowired
-    private ProviderRepository providerRepository;
+    private final ProviderRepository providerRepository;
 
-    @Autowired
-    private RoleAssignmentExtractor roleAssignmentExtractor;
+    private final RoleAssignmentExtractor roleAssignmentExtractor;
 
 
     @Value("${authorization.enabled:true}")
     protected boolean authorizationEnabled;
+
+    public ProviderAuthenticationService(ProviderRepository providerRepository, RoleAssignmentExtractor roleAssignmentExtractor) {
+        this.providerRepository = providerRepository;
+        this.roleAssignmentExtractor = roleAssignmentExtractor;
+    }
 
 
     public boolean hasRoleForProvider(Authentication authentication, String role, Long providerId) {

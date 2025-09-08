@@ -16,22 +16,20 @@
 package no.rutebanken.nabu.rest;
 
 import com.google.common.collect.Sets;
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
 import no.rutebanken.nabu.domain.event.JobEvent;
 import no.rutebanken.nabu.domain.event.JobState;
 import no.rutebanken.nabu.domain.event.TimeTableAction;
 import no.rutebanken.nabu.repository.EventRepository;
 import no.rutebanken.nabu.rest.domain.DataDeliveryStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import java.util.*;
 
 import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_ROUTE_DATA_ADMIN;
@@ -40,13 +38,16 @@ import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_ROU
 @Component
 @Produces("application/json")
 @Path("latest_upload")
-@Api(tags = {"Latest upload resource"}, produces = "application/json")
+@Tags(value = {
+        @Tag(name = "LatestUploadResource", description = "Latest upload resource")
+})
 public class LatestUploadResource {
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final EventRepository eventRepository;
 
-    @Autowired
-    EventRepository eventRepository;
+    public LatestUploadResource(EventRepository eventRepository) {
+        this.eventRepository = eventRepository;
+    }
 
     @GET
     @Path("/{providerId}")

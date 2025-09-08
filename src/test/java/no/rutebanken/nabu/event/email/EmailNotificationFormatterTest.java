@@ -22,70 +22,67 @@ import no.rutebanken.nabu.domain.event.JobEvent;
 import no.rutebanken.nabu.domain.event.JobState;
 import no.rutebanken.nabu.domain.event.Notification;
 import no.rutebanken.nabu.provider.model.Provider;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-@RunWith(SpringRunner.class)
+import static org.assertj.core.api.Assertions.assertThat;
+
 @SpringBootTest(classes = NabuTestApp.class)
-public class EmailNotificationFormatterTest {
+class EmailNotificationFormatterTest {
 
     @Autowired
     private EmailNotificationFormatter emailNotificationFormatter;
-    private List<Provider> providerList = Arrays.asList(new Provider(1011l, "ProviderName", null));
+
+    private final List<Provider> providerList = List.of(new Provider(1011L, "ProviderName", null));
 
     @Test
-    public void formatMailInNorwegian() throws FileNotFoundException {
+    void formatMailInNorwegian() throws FileNotFoundException {
         Set<Notification> notifications = Sets.newHashSet(jobNotification("file.xml"), maxCrudNotification("NSR:StopPlace:16688", Instant.now()));
 
-        String msg = emailNotificationFormatter.formatMessage(notifications, new Locale("no"), providerList);
+        String msg = emailNotificationFormatter.formatMessage(notifications, Locale.of("no"), providerList);
         System.out.println(msg);
         PrintWriter out = new PrintWriter("target/email.html");
         out.write(msg);
         out.close();
-        Assert.assertTrue(msg.startsWith("<html>"));
-        Assert.assertFalse("Expected all message keys to have been resolved", msg.contains("notification.email"));
-        Assert.assertTrue(msg.contains("hendelser"));   // TODO norwegian still missing lots of values. How do we verify?
 
-        Assert.assertTrue("Should be able to map providerId to name", msg.contains(providerList.get(0).getName()));
+        assertThat(msg).startsWith("<html>")
+                .doesNotContain("notification.email")
+                .contains("hendelser")
+                .contains(providerList.getFirst().getName());
     }
 
     @Test
-    public void formatMailWithTooManyEvents() {
+    void formatMailWithTooManyEvents() {
         Instant now = Instant.now();
 
         Set<Notification> notifications = Sets.newHashSet(jobNotification(null), maxCrudNotification("NSR:StopPlace:2", now.minusMillis(1000)), maxCrudNotification("NSR:StopPlace:1", now.minusMillis(2000)),
-                minCrudNotification("NSR:StopPlace:2", now.minusMillis(3000)), maxCrudNotification("NSR:StopPlace:3", now.minusMillis(4000)));
+                minCrudNotification(now.minusMillis(3000)), maxCrudNotification("NSR:StopPlace:3", now.minusMillis(4000)));
 
         Notification oldestEvent = maxCrudNotification("NSR:StopPlace:2", now.minusMillis(5000));
         oldestEvent.getEvent().setName("nameShouldNotBeInEmail");
         notifications.add(oldestEvent);
 
-        String msg = emailNotificationFormatter.formatMessage(notifications, new Locale("en"), providerList);
-        System.out.println(msg);
-        Assert.assertTrue(msg.startsWith("<html>"));
-        Assert.assertFalse("Expected all message keys to have been resolved", msg.contains("notification.email"));
-        Assert.assertTrue(msg.contains("Too many events have been registered in the period (6). Only the 5 newest events are included"));
+        String msg = emailNotificationFormatter.formatMessage(notifications, Locale.ENGLISH, providerList);
 
-        Assert.assertFalse("Expected oldest event to be omitted", msg.contains(oldestEvent.getEvent().getName()));
+        assertThat(msg).startsWith("<html>")
+                .doesNotContain(oldestEvent.getEvent().getName())
+                .doesNotContain("notification.email")
+                .contains("Too many events have been registered in the period (6). Only the 5 newest events are included");
     }
 
 
     private Notification jobNotification(String fileName) {
         Notification notification = new Notification();
 
-        JobEvent event = JobEvent.builder().domain(JobEvent.JobDomain.TIMETABLE).state(JobState.FAILED).providerId(providerList.get(0).id).referential("rb_bra").action("IMPORT").externalId("3209").name(fileName).eventTime(Instant.now()).build();
+        JobEvent event = JobEvent.builder().domain(JobEvent.JobDomain.TIMETABLE).state(JobState.FAILED).providerId(providerList.getFirst().id).referential("rb_bra").action("IMPORT").externalId("3209").name(fileName).eventTime(Instant.now()).build();
         event.setPk(pkCounter++);
         notification.setEvent(event);
 
@@ -94,9 +91,9 @@ public class EmailNotificationFormatterTest {
 
     long pkCounter = 1;
 
-    private Notification minCrudNotification(String id, Instant time) {
+    private Notification minCrudNotification(Instant time) {
         Notification notification = new Notification();
-        CrudEvent event = CrudEvent.builder().entityType("StopPlace").version(1l).eventTime(time).build();
+        CrudEvent event = CrudEvent.builder().entityType("StopPlace").version(1L).eventTime(time).build();
         event.setPk(pkCounter++);
         notification.setEvent(event);
 
@@ -105,7 +102,7 @@ public class EmailNotificationFormatterTest {
 
     private Notification maxCrudNotification(String id, Instant time) {
         Notification notification = new Notification();
-        CrudEvent event = CrudEvent.builder().entityType("StopPlace").entityClassifier("onstreetBus").version(1l).comment("comment").changeType("NAME").oldValue("Old name").newValue("Hakkadal").username("UserDTO e").action("CREATE").name("Hakkadal").externalId(id).eventTime(time).build();
+        CrudEvent event = CrudEvent.builder().entityType("StopPlace").entityClassifier("onstreetBus").version(1L).comment("comment").changeType("NAME").oldValue("Old name").newValue("Hakkadal").username("UserDTO e").action("CREATE").name("Hakkadal").externalId(id).eventTime(time).build();
         event.setPk(pkCounter++);
         notification.setEvent(event);
 

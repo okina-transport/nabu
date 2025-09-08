@@ -15,35 +15,35 @@
 
 package no.rutebanken.nabu.rest;
 
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
+import jakarta.ws.rs.BeanParam;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
 import no.rutebanken.nabu.domain.event.CrudEventSearch;
 import no.rutebanken.nabu.repository.EventRepository;
 import no.rutebanken.nabu.rest.domain.ApiCrudEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.BeanParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 @Produces("application/json")
 @Path("change_log")
-@Api(tags = {"Change log resource"}, produces = "application/json")
+@Tags(value = {
+        @Tag(name = "ChangeLogResource", description = "Change log resource")
+})
 public class ChangeLogResource {
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final EventRepository eventRepository;
 
-    @Autowired
-    private EventRepository eventRepository;
+    public ChangeLogResource(EventRepository eventRepository) {
+        this.eventRepository = eventRepository;
+    }
 
     @GET
     public List<ApiCrudEvent> find(@BeanParam CrudEventSearch search) {
-        return eventRepository.findCrudEvents(search).stream().map(crudEvent -> ApiCrudEvent.fromCrudEvent(crudEvent)).collect(Collectors.toList());
+        return eventRepository.findCrudEvents(search).stream().map(ApiCrudEvent::fromCrudEvent).toList();
     }
 }

@@ -17,15 +17,19 @@ package no.rutebanken.nabu.event.user.dto.organisation;
 
 
 
+import lombok.Getter;
+import lombok.Setter;
 import no.rutebanken.nabu.event.user.dto.BaseDTO;
 import org.wololo.geojson.Polygon;
 
+@Getter
+@Setter
 public class AdministrativeZoneDTO extends BaseDTO {
 
-	public String name;
+	private String name;
 
-	public String source;
+	private String source;
 
-	public Polygon polygon;
+	private Polygon polygon;
 
 }

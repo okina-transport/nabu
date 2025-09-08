@@ -20,10 +20,10 @@ import no.rutebanken.nabu.domain.event.Event;
 import no.rutebanken.nabu.domain.event.JobEvent;
 import no.rutebanken.nabu.domain.event.JobState;
 import no.rutebanken.nabu.event.EventService;
+import no.rutebanken.nabu.provider.ProviderRepository;
 import no.rutebanken.nabu.repository.EventRepository;
 import no.rutebanken.nabu.rest.domain.JobStatus;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;
@@ -34,68 +34,70 @@ import java.util.List;
 
 import static no.rutebanken.nabu.domain.event.TimeTableAction.EXPORT;
 import static no.rutebanken.nabu.domain.event.TimeTableAction.IMPORT;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public class TimeTableJobEventResourceTest extends BaseIntegrationTest {
-
+class TimeTableJobEventResourceTest extends BaseIntegrationTest {
 
     @Autowired
     private EventService eventService;
 
     @Autowired
     private EventRepository eventRepository;
+
+    @Autowired
+    private ProviderRepository providerRepository;
     
     @Test
-    public void testGetStatusForProvider() throws Exception {
+    void testGetStatusForProvider() {
 
         List<JobEvent> rawEvents = new ArrayList<>();
 
         Instant t0 = Instant.now().minusMillis(2000);
 
         // Job "b" -> OK
-        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename2", 2l, null, EXPORT.toString(), JobState.PENDING, "b", t0.plusMillis(4), "ost"));
-        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename2", 2l, "1", EXPORT.toString(), JobState.STARTED, "b", t0.plusMillis(5), "pb"));
-        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename2", 2l, "1", EXPORT.toString(), JobState.OK, "b", t0.plusMillis(6), "pb"));
+        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename2", 2L, null, EXPORT.toString(), JobState.PENDING, "b", t0.plusMillis(4), "ost"));
+        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename2", 2L, "1", EXPORT.toString(), JobState.STARTED, "b", t0.plusMillis(5), "pb"));
+        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename2", 2L, "1", EXPORT.toString(), JobState.OK, "b", t0.plusMillis(6), "pb"));
 
         // Job "a" -> FAILED
-        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename1", 2l, null, IMPORT.toString(), JobState.PENDING, "a", t0.plusMillis(1), "ost"));
-        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename1", 2l, "2", IMPORT.toString(), JobState.STARTED, "a", t0.plusMillis(2), "ost"));
-        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename1", 2l, "2", IMPORT.toString(), JobState.FAILED, "a", t0.plusMillis(3), "ost"));
+        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename1", 2L, null, IMPORT.toString(), JobState.PENDING, "a", t0.plusMillis(1), "ost"));
+        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename1", 2L, "2", IMPORT.toString(), JobState.STARTED, "a", t0.plusMillis(2), "ost"));
+        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename1", 2L, "2", IMPORT.toString(), JobState.FAILED, "a", t0.plusMillis(3), "ost"));
 
 
-        List<JobStatus> listStatus = new TimeTableJobEventResource().convert(rawEvents, null, false);
+        List<JobStatus> listStatus = new TimeTableJobEventResource(eventService, providerRepository).convert(rawEvents, null, false);
 
-        Assert.assertNotNull(listStatus);
-        Assert.assertEquals(2, listStatus.size());
+        assertThat(listStatus).isNotEmpty().hasSize(2);
 
-        JobStatus a = listStatus.get(0);
+        JobStatus a = listStatus.getFirst();
 
-        Assert.assertEquals("a", a.getCorrelationId());
-        Assert.assertEquals(IMPORT.toString(), a.getEvents().get(0).action);
-        Assert.assertEquals(JobStatus.State.FAILED, a.getEndStatus());
-        Assert.assertEquals(3, a.getEvents().size());
-        Assert.assertEquals(Date.from(t0.plusMillis(1)), a.getFirstEvent());
-        Assert.assertEquals(Date.from(t0.plusMillis(3)), a.getLastEvent());
+        assertThat(a.getCorrelationId()).isEqualTo("a");
+        assertThat(a.getEvents().getFirst().getAction()).isEqualTo(IMPORT.toString());
+        assertThat(a.getEndStatus()).isEqualTo(JobStatus.State.FAILED);
+        assertThat(a.getEvents()).hasSize(3);
+        assertThat(a.getFirstEvent()).isEqualTo(Date.from(t0.plusMillis(1)));
+        assertThat(a.getLastEvent()).isEqualTo(Date.from(t0.plusMillis(3)));
 
-        Assert.assertEquals(Long.valueOf(2), a.getEvents().get(1).chouetteJobId);
+        assertThat(a.getEvents().get(1).chouetteJobId).isEqualTo(2);
 
         JobStatus b = listStatus.get(1);
 
-        Assert.assertEquals("b", b.getCorrelationId());
-        Assert.assertEquals(EXPORT.toString(), b.getEvents().get(0).action);
-        Assert.assertEquals(JobStatus.State.OK, b.getEndStatus());
-        Assert.assertEquals(3, b.getEvents().size());
-        Assert.assertEquals(Date.from(t0.plusMillis(4)), b.getFirstEvent());
-        Assert.assertEquals(Date.from(t0.plusMillis(6)), b.getLastEvent());
+        assertThat(b.getCorrelationId()).isEqualTo("b");
+        assertThat(b.getEvents().getFirst().getAction()).isEqualTo(EXPORT.toString());
+        assertThat(b.getEndStatus()).isEqualTo(JobStatus.State.OK);
+        assertThat(b.getEvents()).hasSize(3);
+        assertThat(b.getFirstEvent()).isEqualTo(Date.from(t0.plusMillis(4)));
+        assertThat(b.getLastEvent()).isEqualTo(Date.from(t0.plusMillis(6)));
 
-        Assert.assertEquals("ost", b.getEvents().get(0).referential);
-        Assert.assertEquals(Long.valueOf(1), b.getEvents().get(1).chouetteJobId);
-        Assert.assertEquals("pb", b.getEvents().get(1).referential);
-        Assert.assertEquals(Long.valueOf(1), b.getEvents().get(2).chouetteJobId);
-        Assert.assertEquals("pb", b.getEvents().get(2).referential);
+        assertThat(b.getEvents().getFirst().getReferential()).isEqualTo("ost");
+        assertThat(b.getEvents().get(1).getChouetteJobId()).isEqualTo(1);
+        assertThat(b.getEvents().get(1).getReferential()).isEqualTo("pb");
+        assertThat(b.getEvents().get(2).getChouetteJobId()).isEqualTo(1);
+        assertThat(b.getEvents().get(2).getReferential()).isEqualTo("pb");
     }
 
     @Test
-    public void testDelete() {
+    void testDelete() {
 
         // 1 orga avec 15 events d'import (keep 10) dont 7 > keepDays
 
@@ -119,7 +121,8 @@ public class TimeTableJobEventResourceTest extends BaseIntegrationTest {
 
         eventService.clearByDaysOrNumberEvents(60, 10);
         List<Event> jobEvents1 = eventRepository.findAll();
-        Assert.assertEquals(12, jobEvents1.size());
+
+        assertThat(jobEvents1).isNotEmpty().hasSize(12);
 
 
         // 1 orga avec 9 events (keep 10) dont 2 > du keepDays
@@ -138,7 +141,8 @@ public class TimeTableJobEventResourceTest extends BaseIntegrationTest {
 
         eventService.clearByDaysOrNumberEvents(60, 10);
         List<Event> jobEvents2 = eventRepository.findAll();
-        Assert.assertEquals(9, jobEvents2.size());
+
+        assertThat(jobEvents2).isNotEmpty().hasSize(9);
 
         // 1 orga avec 11 events (keep 10) all < keepDays
 
@@ -157,7 +161,8 @@ public class TimeTableJobEventResourceTest extends BaseIntegrationTest {
 
         eventService.clearByDaysOrNumberEvents(60, 10);
         List<Event> jobEvents3 = eventRepository.findAll();
-        Assert.assertEquals(11, jobEvents3.size());
+
+        assertThat(jobEvents3).isNotEmpty().hasSize(11);
 
         // 1 orga avec 8 events (keep 10) all < keepDays
 
@@ -174,7 +179,8 @@ public class TimeTableJobEventResourceTest extends BaseIntegrationTest {
 
         eventService.clearByDaysOrNumberEvents(60, 10);
         List<Event> jobEvents4 = eventRepository.findAll();
-        Assert.assertEquals(8, jobEvents4.size());
+
+        assertThat(jobEvents4).isNotEmpty().hasSize(8);
 
 
         // 3 orga avec 12 events (keep 10) all < keepDays
@@ -234,8 +240,8 @@ public class TimeTableJobEventResourceTest extends BaseIntegrationTest {
 
         eventService.clearByDaysOrNumberEvents(60, 10);
         List<Event> jobEvents5 = eventRepository.findAll();
-        Assert.assertEquals(36, jobEvents5.size());
 
+        assertThat(jobEvents5).hasSize(36);
     }
 
     void createJobEvent(String domain, String referential, Instant instant, String correlationId, JobState state, String action, Long providerId, String name, String externalId, String type){
@@ -249,7 +255,7 @@ public class TimeTableJobEventResourceTest extends BaseIntegrationTest {
         jobEvent.setProviderId(providerId);
         jobEvent.setName(name);
         jobEvent.setExternalId(externalId);
-        jobEvent.setType(null);
+        jobEvent.setType(type);
 
         eventRepository.save(jobEvent);
     }

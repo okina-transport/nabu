@@ -24,7 +24,6 @@ import no.rutebanken.nabu.event.user.dto.user.UserDTO;
 import no.rutebanken.nabu.repository.NotificationRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -34,19 +33,22 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class UserNotificationEventHandler implements EventHandler {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserNotificationEventHandler.class);
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private NotificationRepository notificationRepository;
+    private final NotificationRepository notificationRepository;
 
-    @Autowired
-    private ImmediateNotificationService immediateNotificationService;
+    private final ImmediateNotificationService immediateNotificationService;
 
-    @Autowired
-    private EventMatcherFactory eventMatcherFactory;
+    private final EventMatcherFactory eventMatcherFactory;
+
+    public UserNotificationEventHandler(UserRepository userRepository, NotificationRepository notificationRepository, ImmediateNotificationService immediateNotificationService, EventMatcherFactory eventMatcherFactory) {
+        this.userRepository = userRepository;
+        this.notificationRepository = notificationRepository;
+        this.immediateNotificationService = immediateNotificationService;
+        this.eventMatcherFactory = eventMatcherFactory;
+    }
 
     @Override
     public void onEvent(Event event) {
@@ -60,7 +62,7 @@ public class UserNotificationEventHandler implements EventHandler {
         }
 
         user.getNotifications().stream()
-                .filter(notificationConfiguration -> notificationConfiguration.isEnabled())
+                .filter(NotificationConfigDTO::isEnabled)
                 .filter(notificationConfig -> eventMatcherFactory.createEventMatcher(notificationConfig.getEventFilter()).matches(event))
                 .forEach(notificationConfig -> createNotification(user, notificationConfig, event));
 
@@ -72,14 +74,10 @@ public class UserNotificationEventHandler implements EventHandler {
         if (notification.getType().isImmediate()) {
             immediateNotificationService.sendNotifications(notification, user);
         } else {
-            logger.debug("Registered new notification: " + notification);
+            LOGGER.debug("Registered new notification: {}", notification);
             notificationRepository.save(notification);
         }
 
     }
 
-
-    public void setUserRepository(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
 }

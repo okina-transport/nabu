@@ -26,27 +26,26 @@ public class EventMapper {
     public CrudEvent toCrudEvent(CrudEventDTO dto) {
         CrudEvent event = new CrudEvent();
 
-        event.setAction(dto.action);
-        event.setAction(dto.action);
-        event.setCorrelationId(dto.correlationId);
-        event.setEventTime(dto.eventTime);
-        event.setExternalId(dto.externalId);
-        event.setName(dto.name);
-        event.setChangeType(dto.changeType);
+        event.setAction(dto.getAction());
+        event.setCorrelationId(dto.getCorrelationId());
+        event.setEventTime(dto.getEventTime());
+        event.setExternalId(dto.getExternalId());
+        event.setName(dto.getName());
+        event.setChangeType(dto.getChangeType());
 
-        event.setEntityType(dto.entityType);
-        event.setVersion(dto.version);
-        event.setEntityClassifier(dto.entityClassifier);
-        event.setOldValue(dto.oldValue);
-        event.setNewValue(dto.newValue);
-        event.setComment(dto.comment);
-        event.setUsername(dto.username);
-        event.setDescription(dto.description);
-        event.setType(dto.type);
-        event.setLocation(dto.location);
+        event.setEntityType(dto.getEntityType());
+        event.setVersion(dto.getVersion());
+        event.setEntityClassifier(dto.getEntityClassifier());
+        event.setOldValue(dto.getOldValue());
+        event.setNewValue(dto.getNewValue());
+        event.setComment(dto.getComment());
+        event.setUsername(dto.getUsername());
+        event.setDescription(dto.getDescription());
+        event.setType(dto.getType());
+        event.setLocation(dto.getLocation());
 
-        if (dto.geometry != null) {
-            event.setGeometry(new GeoJSONReader().read(dto.geometry));
+        if (dto.getGeometry() != null) {
+            event.setGeometry(new GeoJSONReader().read(dto.getGeometry()));
         }
 
         return event;
@@ -54,18 +53,18 @@ public class EventMapper {
 
     public JobEvent toJobEvent(JobEventDTO dto) {
         JobEvent event = new JobEvent();
-        event.setAction(dto.action);
-        event.setCorrelationId(dto.correlationId);
-        event.setEventTime(dto.eventTime);
-        event.setExternalId(dto.externalId);
-        event.setName(dto.name);
-        event.setProviderId(dto.providerId);
-        event.setReferential(dto.referential);
-        event.setState(dto.state);
-        event.setDomain(dto.domain);
-        event.setUsername(dto.username);
-        event.setDescription(dto.description);
-        event.setType(dto.type);
+        event.setAction(dto.getAction());
+        event.setCorrelationId(dto.getCorrelationId());
+        event.setEventTime(dto.getEventTime());
+        event.setExternalId(dto.getExternalId());
+        event.setName(dto.getName());
+        event.setProviderId(dto.getProviderId());
+        event.setReferential(dto.getReferential());
+        event.setState(dto.getState());
+        event.setDomain(dto.getDomain());
+        event.setUsername(dto.getUsername());
+        event.setDescription(dto.getDescription());
+        event.setType(dto.getType());
 
         return event;
     }

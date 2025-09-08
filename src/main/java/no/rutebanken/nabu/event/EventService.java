@@ -22,14 +22,13 @@ import no.rutebanken.nabu.domain.event.TimeTableAction;
 import no.rutebanken.nabu.repository.EventRepository;
 import no.rutebanken.nabu.repository.NotificationRepository;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,16 +39,19 @@ import java.util.stream.Collectors;
 @Transactional
 public class EventService {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final Logger logger = LoggerFactory.getLogger(EventService.class);
 
-    @Autowired
-    private EventRepository eventRepository;
+    private final EventRepository eventRepository;
 
-    @Autowired
-    private NotificationRepository notificationRepository;
+    private final NotificationRepository notificationRepository;
 
-    @Autowired
-    private List<EventHandler> eventHandlers;
+    private final List<EventHandler> eventHandlers;
+
+    public EventService(EventRepository eventRepository, NotificationRepository notificationRepository, List<EventHandler> eventHandlers) {
+        this.eventRepository = eventRepository;
+        this.notificationRepository = notificationRepository;
+        this.eventHandlers = eventHandlers;
+    }
 
 
     public List<JobEvent> findTimetableJobEvents(List<Long> providerIds, Instant from, Instant to, List<String> actions,
@@ -100,7 +102,7 @@ public class EventService {
 
         eventRepository.deleteAllByPk(idsEventToDelete);
 
-        logger.info("Removed old events. Count: " + idsEventToDelete.size());
+        logger.info("Removed old events. Count: {}", idsEventToDelete.size());
     }
 
     private void getOldJobEvents(List<JobEvent> jobs, int keepDays, int keepJobsPerReferential, List<Long> idsEventToDelete) {
@@ -115,9 +117,9 @@ public class EventService {
             if (jobsEventMap.values().size() > keepJobsPerReferential) {
                 int numberJobToDeleteGroupingByCorrelationId = jobsEventMap.values().size() - keepJobsPerReferential;
                 for(List<JobEvent> jobEvents : jobsEventMap.values()){
-                    LocalDateTime ageLimit = LocalDateTime.now().minusDays(keepDays);
+                    ZonedDateTime ageLimit = ZonedDateTime.now().minusDays(keepDays);
                     List<Long> deleteJobsEvent = jobEvents.stream()
-                            .filter(job -> job.getEventTime() != null && job.getEventTime().isBefore(ageLimit.toDate().toInstant()))
+                            .filter(job -> job.getEventTime() != null && job.getEventTime().isBefore(ageLimit.toInstant()))
                             .map(JobEvent::getPk)
                             .collect(Collectors.toList());
 

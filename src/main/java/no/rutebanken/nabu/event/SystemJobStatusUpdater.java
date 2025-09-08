@@ -21,7 +21,6 @@ import no.rutebanken.nabu.domain.event.JobEvent;
 import no.rutebanken.nabu.repository.SystemJobStatusRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
@@ -31,15 +30,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class SystemJobStatusUpdater implements EventHandler {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final Logger logger = LoggerFactory.getLogger(SystemJobStatusUpdater.class);
 
-    @Autowired
-    private SystemJobStatusRepository systemJobStatusRepository;
+    private final SystemJobStatusRepository systemJobStatusRepository;
+
+    public SystemJobStatusUpdater(SystemJobStatusRepository systemJobStatusRepository) {
+        this.systemJobStatusRepository = systemJobStatusRepository;
+    }
 
     @Override
     public void onEvent(Event event) {
-        if (event instanceof JobEvent) {
-            updateSystemJobStatus((JobEvent) event);
+        if (event instanceof JobEvent jobEvent) {
+            updateSystemJobStatus(jobEvent);
         }
     }
 
@@ -47,14 +49,14 @@ public class SystemJobStatusUpdater implements EventHandler {
         if (jobEvent.getProviderId() == null) {
 
             SystemJobStatus systemJobStatus = new SystemJobStatus(jobEvent.getDomain(), jobEvent.getAction(), jobEvent.getState(), null);
-            SystemJobStatus existingStatus = systemJobStatusRepository.findOne(Example.of(systemJobStatus));
+            SystemJobStatus existingStatus = systemJobStatusRepository.findOne(Example.of(systemJobStatus)).orElse(null);
 
             systemJobStatus.setLastStatusTime(jobEvent.getEventTime());
             if (existingStatus == null) {
-                logger.info("Registering new system status from incoming event: " + systemJobStatus);
+                logger.info("Registering new system status from incoming event: {}", systemJobStatus);
                 systemJobStatusRepository.save(systemJobStatus);
             } else if (existingStatus.getLastStatusTime().isBefore(systemJobStatus.getLastStatusTime())) {
-                logger.debug("Updating system status from incoming event: " + systemJobStatus);
+                logger.debug("Updating system status from incoming event: {}", systemJobStatus);
                 existingStatus.setLastStatusTime(systemJobStatus.getLastStatusTime());
                 systemJobStatusRepository.save(existingStatus);
             }

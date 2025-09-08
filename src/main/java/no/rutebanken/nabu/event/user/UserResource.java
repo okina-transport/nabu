@@ -19,7 +19,6 @@ import no.rutebanken.nabu.event.user.dto.user.UserDTO;
 import no.rutebanken.nabu.security.TokenService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -35,22 +34,25 @@ import java.util.List;
 @Service
 public class UserResource {
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserResource.class);
 
     @Value("${user.registry.rest.service.url:http://baba/services/organisations/users?full=true}")
     private String restServiceUrl;
 
-    @Autowired
-    private TokenService tokenService;
+    private final TokenService tokenService;
 
-    private RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
+
+    public UserResource(TokenService tokenService) {
+        this.tokenService = tokenService;
+        restTemplate = new RestTemplate();
+    }
 
     public List<UserDTO> findAll() {
-        logger.info("Baba user repo url is " + restServiceUrl);
-        logger.info("token used is " + tokenService.getToken());
+        LOGGER.info("Baba user repo url is {}", restServiceUrl);
         ResponseEntity<List<UserDTO>> rateResponse =
                 restTemplate.exchange(restServiceUrl,
-                        HttpMethod.GET, tokenService.getEntityWithAuthenticationToken(), new ParameterizedTypeReference<List<UserDTO>>() {
+                        HttpMethod.GET, tokenService.getEntityWithAuthenticationToken(), new ParameterizedTypeReference<>() {
                         });
         return rateResponse.getBody();
     }

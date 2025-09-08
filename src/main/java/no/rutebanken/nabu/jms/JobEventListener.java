@@ -21,26 +21,29 @@ import no.rutebanken.nabu.jms.dto.JobEventDTO;
 import no.rutebanken.nabu.jms.mapper.EventMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
 @Component
 public class JobEventListener {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final Logger LOGGER = LoggerFactory.getLogger(JobEventListener.class);
 
-    @Autowired
-    private EventService eventService;
+    private final EventService eventService;
 
-    private EventMapper eventMapper = new EventMapper();
+    private final EventMapper eventMapper;
+
+    public JobEventListener(EventService eventService) {
+        this.eventService = eventService;
+        eventMapper = new EventMapper();
+    }
 
     @JmsListener(destination = "JobEventQueue")
     public void processMessage(String content) {
         JobEventDTO dto = JobEventDTO.fromString(content);
 
         Event event = eventMapper.toJobEvent(dto);
-        logger.info("Received job event: " + event);
+        LOGGER.info("Received job event: {}", event);
         eventService.addEvent(event);
     }
 

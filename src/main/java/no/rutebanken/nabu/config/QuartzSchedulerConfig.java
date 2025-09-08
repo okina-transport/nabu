@@ -16,69 +16,25 @@
 package no.rutebanken.nabu.config;
 
 import no.rutebanken.nabu.event.email.EmailSenderJob;
+import org.quartz.Job;
 import org.quartz.JobDetail;
 import org.quartz.SimpleTrigger;
-import org.quartz.Trigger;
-import org.quartz.spi.JobFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
-import org.springframework.scheduling.quartz.SchedulerFactoryBean;
-
-import javax.sql.DataSource;
-import java.io.IOException;
-import java.util.Properties;
 
 /**
  * Based on spring boot quartz example.
  *
- * @see https://github.com/davidkiss/spring-boot-quartz-demo
+ *@see <a href="https://github.com/davidkiss/spring-boot-quartz-demo">https://github.com/davidkiss/spring-boot-quartz-demo</a>
  */
 @Configuration
 @ConditionalOnProperty(name = "quartz.enabled")
 public class QuartzSchedulerConfig {
-    @Value("${org.quartz.jobStore.driverDelegateClass:org.quartz.impl.jdbcjobstore.PostgreSQLDelegate}")
-    private String jobStoreDriverDelegateClass;
-
-
-    @Bean
-    public JobFactory jobFactory(ApplicationContext applicationContext) {
-        AutowiringSpringBeanJobFactory jobFactory = new AutowiringSpringBeanJobFactory();
-        jobFactory.setApplicationContext(applicationContext);
-        return jobFactory;
-    }
-
-    @Bean
-    public SchedulerFactoryBean schedulerFactoryBean(DataSource dataSource, JobFactory jobFactory,
-                                                            @Qualifier("emailNotificationTrigger") Trigger emailNotificationTrigger) throws IOException {
-        SchedulerFactoryBean factory = new SchedulerFactoryBean();
-        // this allows to update triggers in DB when updating settings in config file:
-        factory.setOverwriteExistingJobs(true);
-        factory.setDataSource(dataSource);
-        factory.setJobFactory(jobFactory);
-
-        factory.setQuartzProperties(quartzProperties());
-        factory.setTriggers(emailNotificationTrigger);
-
-        return factory;
-    }
-
-    @Bean
-    public Properties quartzProperties() throws IOException {
-        PropertiesFactoryBean propertiesFactoryBean = new PropertiesFactoryBean();
-        propertiesFactoryBean.setLocation(new ClassPathResource("/quartz.properties"));
-        propertiesFactoryBean.afterPropertiesSet();
-        Properties properties = propertiesFactoryBean.getObject();
-        properties.setProperty("org.quartz.jobStore.driverDelegateClass", jobStoreDriverDelegateClass);
-        return properties;
-    }
 
 
     @Bean
@@ -87,12 +43,12 @@ public class QuartzSchedulerConfig {
     }
 
     @Bean(name = "emailNotificationTrigger")
-    public CronTriggerFactoryBean sampleJobTrigger(@Qualifier("emailNotificationJob") JobDetail jobDetail,
-                                                          @Value("${notification.email.send.cron:0 0 17 ? * MON-FRI}") String cron) {
+    public CronTriggerFactoryBean emailNotificationTrigger(@Qualifier("emailNotificationJob") JobDetail jobDetail,
+                                                           @Value("${notification.email.send.cron:0 0 17 ? * MON-FRI}") String cron) {
         return createCronTrigger(jobDetail, cron);
     }
 
-    private static JobDetailFactoryBean createJobDetail(Class jobClass) {
+    private static JobDetailFactoryBean createJobDetail(Class<? extends Job> jobClass) {
         JobDetailFactoryBean factoryBean = new JobDetailFactoryBean();
         factoryBean.setJobClass(jobClass);
         // job has to be durable to be stored in DB:

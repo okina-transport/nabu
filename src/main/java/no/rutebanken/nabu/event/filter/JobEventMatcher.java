@@ -25,7 +25,7 @@ import no.rutebanken.nabu.event.user.dto.user.EventFilterDTO;
  */
 public class JobEventMatcher implements EventMatcher {
 
-    private EventFilterDTO filter;
+    private final EventFilterDTO filter;
 
     public JobEventMatcher(EventFilterDTO jobEventFilter) {
         this.filter = jobEventFilter;
