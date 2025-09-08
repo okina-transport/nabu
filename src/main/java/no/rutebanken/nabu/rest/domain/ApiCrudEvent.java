@@ -16,6 +16,8 @@
 package no.rutebanken.nabu.rest.domain;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Getter;
+import lombok.Setter;
 import no.rutebanken.nabu.domain.event.CrudEvent;
 
 import java.time.Instant;
@@ -24,32 +26,34 @@ import java.time.Instant;
  * CrudEvent model for API usage.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Getter
+@Setter
 public class ApiCrudEvent {
-    public Instant registeredTime;
+    private Instant registeredTime;
 
-    public Instant eventTime;
+    private Instant eventTime;
 
-    public String entityType;
+    private String entityType;
 
-    public String entityClassifier;
+    private String entityClassifier;
 
-    public String action;
+    private String action;
 
-    public String externalId;
+    private String externalId;
 
-    public Long version;
+    private Long version;
 
-    public String name;
+    private String name;
 
-    public String changeType;
+    private String changeType;
 
-    public String oldValue;
+    private String oldValue;
 
-    public String newValue;
+    private String newValue;
 
-    public String comment;
+    private String comment;
 
-    public String username;
+    private String username;
 
     public static ApiCrudEvent fromCrudEvent(CrudEvent crudEvent) {
         ApiCrudEvent apiCrudEvent = new ApiCrudEvent();

@@ -15,18 +15,11 @@
 
 package no.rutebanken.nabu.domain.event;
 
-import org.apache.commons.lang.ObjectUtils;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import org.apache.commons.lang3.ObjectUtils;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
 import java.time.Instant;
-import java.util.Date;
 
 @Entity
 @Table(indexes = {@Index(name = "i_event_provider", columnList = "providerId,correlationId,action,eventTime")})

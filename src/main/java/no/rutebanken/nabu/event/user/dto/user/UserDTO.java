@@ -16,6 +16,8 @@
 package no.rutebanken.nabu.event.user.dto.user;
 
 
+import lombok.Getter;
+import lombok.Setter;
 import no.rutebanken.nabu.event.user.dto.BaseDTO;
 import no.rutebanken.nabu.event.user.dto.organisation.OrganisationDTO;
 
@@ -24,44 +26,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-
+@Getter
+@Setter
 public class UserDTO extends BaseDTO {
 
-    public String username;
+    private String username;
 
-    public String organisationRef;
+    private String organisationRef;
 
-    public List<String> responsibilitySetRefs = new ArrayList<>();
+    private List<String> responsibilitySetRefs = new ArrayList<>();
 
-    public ContactDetailsDTO contactDetails;
+    private ContactDetailsDTO contactDetails;
 
-    public Set<NotificationConfigDTO> notifications = new HashSet<>();
-
+    private Set<NotificationConfigDTO> notifications = new HashSet<>();
 
     // Full objects included for ease of use, disregarded in CRUD
-    public OrganisationDTO organisation;
+    private OrganisationDTO organisation;
 
-    public String getUsername() {
-        return username;
-    }
-
-    public String getOrganisationRef() {
-        return organisationRef;
-    }
-
-    public List<String> getResponsibilitySetRefs() {
-        return responsibilitySetRefs;
-    }
-
-    public ContactDetailsDTO getContactDetails() {
-        return contactDetails;
-    }
-
-    public Set<NotificationConfigDTO> getNotifications() {
-        return notifications;
-    }
-
-    public OrganisationDTO getOrganisation() {
-        return organisation;
-    }
 }

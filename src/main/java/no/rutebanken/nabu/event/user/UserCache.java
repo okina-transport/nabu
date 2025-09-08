@@ -21,7 +21,6 @@ import no.rutebanken.nabu.event.user.dto.user.UserDTO;
 import no.rutebanken.nabu.exceptions.NabuException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -33,18 +32,19 @@ import java.util.List;
 
 @Service
 public class UserCache implements UserRepository {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserCache.class);
 
-    @Autowired
-    private UserResource userResource;
-
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
-
+    private final UserResource userResource;
 
     @Value("${user.cache.max.size:1000}")
     private Integer cacheMaxSize;
 
 
     private Cache<String, UserDTO> cache;
+
+    public UserCache(UserResource userResource) {
+        this.userResource = userResource;
+    }
 
 
     @Scheduled(fixedRateString = "${user.cache.refresh.interval:300000}")
@@ -53,24 +53,24 @@ public class UserCache implements UserRepository {
             Cache<String, UserDTO> newCache = CacheBuilder.newBuilder().maximumSize(cacheMaxSize).build();
 
             List<UserDTO> allUsers = userResource.findAll();
-            logger.info("found " + allUsers.size() + " user(s)");
-            allUsers.stream().forEach(user -> {
-                logger.info("found user " + user.toString());
-                logger.info("orga ref :" + user.getOrganisationRef());
-                logger.info("orga :" + user.getOrganisation());
-                logger.info("resp set ref :" + user.getResponsibilitySetRefs());
+            LOGGER.info("found {} user(s)", allUsers.size());
+            allUsers.forEach(user -> {
+                LOGGER.info("found user : {}", user);
+                LOGGER.info("orga ref : {}", user.getOrganisationRef());
+                LOGGER.info("orga : {}", user.getOrganisation());
+                LOGGER.info("resp set ref : {}", user.getResponsibilitySetRefs());
 //                newCache.put(user.getUsername(), user); TODO : à débug !!!
             });
 
             cache = newCache;
 
-            logger.info("Updated user cache with result from REST User Service. Cache now has " + cache.size() + " elements");
+            LOGGER.info("Updated user cache with result from REST User Service. Cache now has {} elements", cache.size());
         } catch (ResourceAccessException re) {
             if (re.getCause() instanceof ConnectException) {
                 if (cache == null) {
-                    logger.warn("Refresh REST User cache failed:" + re.getMessage() + ". No user info available");
+                    LOGGER.warn("Refresh REST User cache failed: {}. No user info available", re.getMessage());
                 } else {
-                    logger.warn("Refresh REST User cache failed:" + re.getMessage() + ". Could not update user cache, but keeping " + cache.size() + " existing elements.");
+                    LOGGER.warn("Refresh REST User cache failed: {}. Could not update user cache, but keeping {}} existing elements.",  re.getMessage(), cache.size());
                 }
             } else {
                 throw re;

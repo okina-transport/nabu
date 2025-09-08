@@ -25,7 +25,7 @@ import java.util.List;
 
 public class JobLinkResolverMethod implements TemplateMethodModelEx {
 
-    private String baseUrl;
+    private final String baseUrl;
 
     public JobLinkResolverMethod(String baseUrl) {
         this.baseUrl = baseUrl;
@@ -33,10 +33,10 @@ public class JobLinkResolverMethod implements TemplateMethodModelEx {
 
     @Override
     public Object exec(List arguments) throws TemplateModelException {
-        if (arguments.size() < 1) {
+        if (arguments.isEmpty()) {
             throw new TemplateModelException("Wrong number of arguments");
         }
-        Object obj = ((BeanModel) arguments.get(0)).getWrappedObject();
+        Object obj = ((BeanModel) arguments.getFirst()).getWrappedObject();
         if (!(obj instanceof JobEvent)) {
             throw new TemplateModelException("Wrong type of argument");
         }

@@ -16,17 +16,18 @@
 package no.rutebanken.nabu.event.user.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Getter;
+import lombok.Setter;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Getter
+@Setter
 public class BaseDTO {
 
-	public String id;
+	private String id;
 
-	public String codeSpace;
+	private String codeSpace;
 
-	public String privateCode;
+	private String privateCode;
 
-	public String getPrivateCode() {
-		return privateCode;
-	}
 }

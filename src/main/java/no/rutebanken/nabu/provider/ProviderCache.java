@@ -21,7 +21,6 @@ import no.rutebanken.nabu.exceptions.NabuException;
 import no.rutebanken.nabu.provider.model.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Repository;
@@ -34,15 +33,18 @@ import java.util.Collection;
 @Repository
 public class ProviderCache implements ProviderRepository {
 
-    @Autowired
-    private ProviderResource restProviderService;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProviderCache.class);
+
+    private final ProviderResource restProviderService;
 
     @Value("${provider.cache.max.size:200}")
     private Integer cacheMaxSize;
 
     private static Cache<Long, Provider> cache;
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    public ProviderCache(ProviderResource restProviderService) {
+        this.restProviderService = restProviderService;
+    }
 
     @Scheduled(fixedRateString = "${provider.cache.refresh.interval:300000}")
     public void populate() {
@@ -51,13 +53,13 @@ public class ProviderCache implements ProviderRepository {
             restProviderService.getProviders().stream().forEach(provider -> newCache.put(provider.getId(), provider));
 
             cache = newCache;
-            logger.info("Updated provider cache with result from REST Provider Service. Cache now has " + cache.size() + " elements");
+            LOGGER.info("Updated provider cache with result from REST Provider Service. Cache now has {} elements",  cache.size());
         } catch (ResourceAccessException re) {
             if (re.getCause() instanceof ConnectException) {
                 if (cache == null) {
-                    logger.warn("Refresh REST provider cache failed:" + re.getMessage() + ". No provider info available");
+                    LOGGER.warn("Refresh REST provider cache failed: {}. No provider info available", re.getMessage());
                 } else {
-                    logger.warn("Refresh REST provider cache failed:" + re.getMessage() + ". Could not update provider cache, but keeping " + cache.size() + " existing elements.");
+                    LOGGER.warn("Refresh REST provider cache failed: {}. Could not update provider cache, but keeping {} existing elements.", re.getMessage(), cache.size());
                 }
             } else {
                 throw re;

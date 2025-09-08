@@ -20,85 +20,97 @@ import no.rutebanken.nabu.domain.event.JobEvent;
 import no.rutebanken.nabu.domain.event.JobState;
 import no.rutebanken.nabu.event.user.dto.organisation.OrganisationDTO;
 import no.rutebanken.nabu.event.user.dto.user.EventFilterDTO;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class JobEventMatcherTest {
+import static org.assertj.core.api.Assertions.assertThat;
+
+class JobEventMatcherTest {
 
     @Test
-    public void eventMatchingFilterWithoutOrganisationSet() {
+    void eventMatchingFilterWithoutOrganisationSet() {
         EventFilterDTO filter = testFilter();
-        Assert.assertTrue(new JobEventMatcher(filter).matches(matchingJobEvent(filter)));
+
+        assertThat(new JobEventMatcher(filter).matches(matchingJobEvent(filter))).isTrue();
     }
 
     @Test
-    public void eventMatchingFilterWithOrganisationSet() {
+    void eventMatchingFilterWithOrganisationSet() {
         EventFilterDTO filter = testFilter(organisationDTO("KOK"));
         JobEvent orgSpaceEvent = matchingJobEvent(filter);
-        Assert.assertTrue(new JobEventMatcher(filter).matches(orgSpaceEvent));
+        assertThat(new JobEventMatcher(filter).matches(orgSpaceEvent)).isTrue();
 
         JobEvent rbSpaceEvent = matchingJobEvent(filter);
         rbSpaceEvent.setReferential("rb_kok");
-        Assert.assertTrue(new JobEventMatcher(filter).matches(rbSpaceEvent));
+        assertThat(new JobEventMatcher(filter).matches(rbSpaceEvent)).isTrue();
     }
 
     @Test
-    public void eventWithoutRefNotNotMatchingFilterWithOrganisationSet() {
+    void eventWithoutRefNotNotMatchingFilterWithOrganisationSet() {
         EventFilterDTO filter = testFilter(organisationDTO("KOK"));
         JobEvent event = matchingJobEvent(filter);
         event.setReferential(null);
-        Assert.assertFalse(new JobEventMatcher(filter).matches(event));
+
+        assertThat(new JobEventMatcher(filter).matches(event)).isFalse();
     }
 
 
     @Test
-    public void eventWithOtherRefNotNotMatchingFilterWithOrganisationSet() {
+    void eventWithOtherRefNotNotMatchingFilterWithOrganisationSet() {
         EventFilterDTO filter = testFilter(organisationDTO("KOK"));
         JobEvent event = matchingJobEvent(filter);
         event.setReferential("otherRef");
-        Assert.assertFalse(new JobEventMatcher(filter).matches(event));
+
+        assertThat(new JobEventMatcher(filter).matches(event)).isFalse();
     }
 
 
     @Test
-    public void eventWithDifferentJobDomainNotMatchingFilterWithoutOrganisationSet() {
+    void eventWithDifferentJobDomainNotMatchingFilterWithoutOrganisationSet() {
         EventFilterDTO filter = testFilter();
         JobEvent event = matchingJobEvent(filter);
         event.setDomain("otherDomain");
-        Assert.assertFalse(new JobEventMatcher(filter).matches(event));
+
+        assertThat(new JobEventMatcher(filter).matches(event)).isFalse();
     }
 
     @Test
-    public void eventWithDifferentActionNotMatchingFilterWithoutOrganisationSet() {
+    void eventWithDifferentActionNotMatchingFilterWithoutOrganisationSet() {
         EventFilterDTO filter = testFilter();
         JobEvent event = matchingJobEvent(filter);
         event.setAction("otherAction");
-        Assert.assertFalse(new JobEventMatcher(filter).matches(event));
+
+        assertThat(new JobEventMatcher(filter).matches(event)).isFalse();
     }
 
     @Test
-    public void eventWithDifferentStateNotMatchingFilterWithoutOrganisationSet() {
+    void eventWithDifferentStateNotMatchingFilterWithoutOrganisationSet() {
         EventFilterDTO filter = testFilter();
         JobEvent event = matchingJobEvent(filter);
         event.setState(JobState.PENDING);
-        Assert.assertFalse(new JobEventMatcher(filter).matches(event));
+
+        assertThat(new JobEventMatcher(filter).matches(event)).isFalse();
     }
 
     @Test
-    public void allStatesMatchingWildcardAction() {
+    void allStatesMatchingWildcardAction() {
         EventFilterDTO filter = testFilter();
-        filter.actions = Sets.newHashSet(EventMatcher.ALL_TYPES);
+        filter.setActions(Sets.newHashSet(EventMatcher.ALL_TYPES));
         JobEvent event = matchingJobEvent(filter);
 
-        Assert.assertTrue(new JobEventMatcher(filter).matches(event));
+        assertThat(new JobEventMatcher(filter).matches(event)).isTrue();
 
         event.setAction("randomAction");
-        Assert.assertTrue(new JobEventMatcher(filter).matches(event));
+        assertThat(new JobEventMatcher(filter).matches(event)).isTrue();
     }
 
     private JobEvent matchingJobEvent(EventFilterDTO filter) {
         String ref = filter.getOrganisation() == null ? null : filter.getOrganisation().getPrivateCode().toLowerCase();
-        return JobEvent.builder().domain(filter.jobDomain).referential(ref).state(filter.states.iterator().next()).action(filter.actions.iterator().next()).build();
+        return JobEvent.builder()
+                .domain(filter.getJobDomain())
+                .referential(ref)
+                .state(filter.getStates().iterator().next())
+                .action(filter.getActions().iterator().next())
+                .build();
     }
 
     private EventFilterDTO testFilter() {
@@ -107,16 +119,16 @@ public class JobEventMatcherTest {
 
     private EventFilterDTO testFilter(OrganisationDTO organisationDTO) {
         EventFilterDTO filter = new EventFilterDTO();
-        filter.jobDomain = JobEvent.JobDomain.TIMETABLE.toString();
-        filter.actions = (Sets.newHashSet("testAction"));
-        filter.organisation = organisationDTO;
-        filter.states = Sets.newHashSet(JobState.FAILED);
+        filter.setJobDomain(JobEvent.JobDomain.TIMETABLE.toString());
+        filter.setActions(Sets.newHashSet("testAction"));
+        filter.setOrganisation(organisationDTO);
+        filter.setStates(Sets.newHashSet(JobState.FAILED));
         return filter;
     }
 
     private OrganisationDTO organisationDTO(String privateCode) {
         OrganisationDTO org = new OrganisationDTO();
-        org.privateCode = privateCode;
+        org.setPrivateCode(privateCode);
         return org;
     }
 }

@@ -18,35 +18,40 @@ package no.rutebanken.nabu.jms.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import lombok.Getter;
+import lombok.Setter;
 import no.rutebanken.nabu.domain.event.JobState;
 
 import java.io.IOException;
 import java.time.Instant;
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Getter
+@Setter
 public class JobEventDTO {
 
-    public Instant eventTime;
+    private Instant eventTime;
 
-    public String correlationId;
+    private String correlationId;
 
-    public String domain;
-    public String action;
-    public JobState state;
+    private String domain;
 
+    private String action;
 
-    public String externalId;
+    private JobState state;
 
-    public Long providerId;
+    private String externalId;
 
-    public String referential;
+    private Long providerId;
 
-    public String name;
+    private String referential;
 
-    public String username;
+    private String name;
 
-    public String description;
+    private String username;
 
-    public String type;
+    private String description;
+
+    private String type;
 
     public static JobEventDTO fromString(String string) {
         try {

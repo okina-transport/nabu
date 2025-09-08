@@ -15,9 +15,13 @@
 
 package no.rutebanken.nabu.event.user.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class TypeDTO extends BaseDTO {
 
-	public String name;
-
+	private String name;
 
 }

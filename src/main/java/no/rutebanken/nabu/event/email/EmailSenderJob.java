@@ -17,22 +17,22 @@ package no.rutebanken.nabu.event.email;
 
 import no.rutebanken.nabu.domain.event.NotificationType;
 import no.rutebanken.nabu.event.ScheduledNotificationService;
-
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Quartz job trigger email notifications.
  */
 public class EmailSenderJob implements Job {
 
-    @Autowired
-    private ScheduledNotificationService scheduledNotificationService;
+    private final ScheduledNotificationService scheduledNotificationService;
+
+    public EmailSenderJob(ScheduledNotificationService scheduledNotificationService) {
+        this.scheduledNotificationService = scheduledNotificationService;
+    }
 
     @Override
-    public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+    public void execute(JobExecutionContext jobExecutionContext) {
         scheduledNotificationService.sendNotifications(NotificationType.EMAIL_BATCH);
     }
 }

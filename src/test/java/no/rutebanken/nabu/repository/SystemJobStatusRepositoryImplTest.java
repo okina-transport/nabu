@@ -18,34 +18,41 @@ package no.rutebanken.nabu.repository;
 import no.rutebanken.nabu.BaseIntegrationTest;
 import no.rutebanken.nabu.domain.SystemJobStatus;
 import no.rutebanken.nabu.domain.event.JobState;
-
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
-public class SystemJobStatusRepositoryImplTest extends BaseIntegrationTest {
+import static org.assertj.core.api.Assertions.assertThat;
+
+class SystemJobStatusRepositoryImplTest extends BaseIntegrationTest {
 
     @Autowired
     private SystemJobStatusRepository systemJobStatusRepository;
 
 
     @Test
-    public void testFind() {
+    void testFind() {
 
         SystemJobStatus s1 = new SystemJobStatus("dom1", "type1", JobState.PENDING, Instant.now());
         SystemJobStatus s2 = new SystemJobStatus("dom1", "type2", JobState.OK, Instant.now().plusMillis(1000));
         SystemJobStatus s3 = new SystemJobStatus("dom2", "type1", JobState.FAILED, Instant.now());
 
-        systemJobStatusRepository.save(Arrays.asList(s1, s2, s3));
+        systemJobStatusRepository.saveAll(Arrays.asList(s1, s2, s3));
 
-        Assert.assertEquals(3, systemJobStatusRepository.find(null, null).size());
+        List<SystemJobStatus> systemJobStatuses = systemJobStatusRepository.find(null, null);
+        assertThat(systemJobStatuses).hasSize(3);
 
-        Assert.assertEquals(Arrays.asList(s3), systemJobStatusRepository.find(Arrays.asList("dom2"), null));
-        Assert.assertEquals(Arrays.asList(s2), systemJobStatusRepository.find(new ArrayList<>(), Arrays.asList("type2")));
-        Assert.assertEquals(Arrays.asList(s1), systemJobStatusRepository.find(Arrays.asList("dom1"), Arrays.asList("type1")));
+        List<SystemJobStatus> dom2 = systemJobStatusRepository.find(List.of("dom2"), null);
+        assertThat(dom2).containsExactly(s3);
+
+        List<SystemJobStatus> type2 = systemJobStatusRepository.find(new ArrayList<>(0), List.of("type2"));
+        assertThat(type2).containsExactly(s2);
+
+        List<SystemJobStatus> type1 = systemJobStatusRepository.find(List.of("dom1"), List.of("type1"));
+        assertThat(type1).containsExactly(s1);
     }
 }

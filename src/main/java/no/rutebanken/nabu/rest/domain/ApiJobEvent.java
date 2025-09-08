@@ -16,6 +16,8 @@
 package no.rutebanken.nabu.rest.domain;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Getter;
+import lombok.Setter;
 import no.rutebanken.nabu.domain.event.JobEvent;
 import no.rutebanken.nabu.domain.event.JobState;
 
@@ -25,33 +27,34 @@ import java.time.Instant;
  * JobEvent model for API usage.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Getter
+@Setter
 public class ApiJobEvent {
 
-    public Instant registeredTime;
+    private Instant registeredTime;
 
-    public Instant eventTime;
+    private Instant eventTime;
 
-    public String correlationId;
+    private String correlationId;
 
-    public String domain;
-    public String action;
-    public JobState state;
+    private String domain;
 
+    private String action;
 
-    public String externalId;
+    private JobState state;
 
-    public Long providerId;
+    private String externalId;
 
-    public String referential;
+    private Long providerId;
 
-    public String name;
+    private String referential;
 
+    private String name;
 
     public static ApiJobEvent fromJobEvent(JobEvent jobEvent) {
         ApiJobEvent apiJobEvent = new ApiJobEvent();
         apiJobEvent.eventTime = jobEvent.getEventTime();
         apiJobEvent.registeredTime = jobEvent.getRegisteredTime();
-
         apiJobEvent.action = jobEvent.getAction();
         apiJobEvent.externalId = jobEvent.getExternalId();
         apiJobEvent.name = jobEvent.getName();

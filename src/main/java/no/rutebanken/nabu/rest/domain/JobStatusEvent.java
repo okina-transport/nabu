@@ -16,11 +16,17 @@
 package no.rutebanken.nabu.rest.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import no.rutebanken.nabu.domain.event.JobEvent;
 import no.rutebanken.nabu.rest.domain.JobStatus.State;
 
 import java.util.Date;
 
+@AllArgsConstructor
+@Getter
+@Setter
 public class JobStatusEvent {
 
     @JsonProperty("state")
@@ -47,23 +53,9 @@ public class JobStatusEvent {
     @JsonProperty("description")
     public String description;
 
-
-    public JobStatusEvent(String action, State state, Date date, Long chouetteJobId, String referential, String type, String name) {
-        this.action = action;
-        this.state = state;
-        this.date = date;
-        this.chouetteJobId = chouetteJobId;
-        this.referential = referential;
-        this.type = type;
-        this.name = name;
-    }
-
     public static JobStatusEvent createFromJobEvent(JobEvent e) {
         Long chouetteId = e.getExternalId() == null ? null : Long.parseLong(e.getExternalId());
-        JobStatusEvent jobStatusEvent = new JobStatusEvent(e.getAction(),
-                State.valueOf(e.getState().name()), Date.from(e.getEventTime()), chouetteId
-                , e.getReferential(), e.getType(), e.getName());
-        jobStatusEvent.description = e.getDescription();
-        return jobStatusEvent;
+        return new JobStatusEvent(State.valueOf(e.getState().name()), Date.from(e.getEventTime()), e.getAction(),
+                chouetteId, e.getReferential(), e.getType(), e.getName(), e.getDescription());
     }
 }

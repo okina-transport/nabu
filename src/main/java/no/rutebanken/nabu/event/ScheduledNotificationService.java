@@ -22,7 +22,6 @@ import no.rutebanken.nabu.event.user.dto.user.UserDTO;
 import no.rutebanken.nabu.repository.NotificationRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,18 +35,22 @@ import java.util.stream.Collectors;
 @Transactional
 public class ScheduledNotificationService {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
-    @Autowired
-    private NotificationRepository notificationRepository;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ScheduledNotificationService.class);
 
-    @Autowired
-    private UserRepository userRepository;
+    private final NotificationRepository notificationRepository;
 
-    @Autowired
-    private Map<NotificationType, NotificationProcessor> notificationSenders;
+    private final UserRepository userRepository;
+
+    private final Map<NotificationType, NotificationProcessor> notificationSenders;
+
+    public ScheduledNotificationService(NotificationRepository notificationRepository, UserRepository userRepository, Map<NotificationType, NotificationProcessor> notificationSenders) {
+        this.notificationRepository = notificationRepository;
+        this.userRepository = userRepository;
+        this.notificationSenders = notificationSenders;
+    }
 
     public void sendNotifications(NotificationType type) {
-        logger.info("About to send notifications of type: " + type);
+        LOGGER.info("About to send notifications of type: {}", type);
         NotificationProcessor notificationSender = notificationSenders.get(type);
         if (notificationSender == null) {
             throw new IllegalArgumentException("No notification sender registered for notification type: " + type);
@@ -58,7 +61,7 @@ public class ScheduledNotificationService {
         Map<String, Set<Notification>> notificationsPerUser = notificationList.stream().collect(Collectors.groupingBy(Notification::getUserName, Collectors.mapping(Function.identity(), Collectors.toSet())));
         notificationsPerUser.forEach((username, notifications) -> sendNotificationsForUser(notificationSender, username, notifications));
 
-        logger.info("Finished sending " + notificationList.size() + " notifications of type: " + type);
+        LOGGER.info("Finished sending {} notifications of type: {}",  notificationList.size(), type);
     }
 
     private void sendNotificationsForUser(NotificationProcessor notificationSender, String userName, Set<Notification> notifications) {
@@ -66,8 +69,8 @@ public class ScheduledNotificationService {
         if (user != null) {
             notificationSender.processNotificationsForUser(user, notifications);
         } else {
-            logger.warn("Cannot send notifications to unknown user: " + userName + ". Discarding notifications: " + notifications);
-            notificationRepository.delete(notifications);
+            LOGGER.warn("Cannot send notifications to unknown user: {}. Discarding notifications: {}", userName, notifications);
+            notificationRepository.deleteAll(notifications);
         }
 
     }

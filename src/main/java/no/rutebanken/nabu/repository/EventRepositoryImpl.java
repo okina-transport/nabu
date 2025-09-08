@@ -15,25 +15,17 @@
 
 package no.rutebanken.nabu.repository;
 
-import no.rutebanken.nabu.domain.event.CrudEvent;
-import no.rutebanken.nabu.domain.event.CrudEventSearch;
-import no.rutebanken.nabu.domain.event.Event;
-import no.rutebanken.nabu.domain.event.JobEvent;
-import no.rutebanken.nabu.domain.event.JobState;
-import no.rutebanken.nabu.domain.event.TimeTableAction;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
+import no.rutebanken.nabu.domain.event.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
@@ -43,14 +35,12 @@ import java.util.Map;
 @Transactional
 public class EventRepositoryImpl extends SimpleJpaRepository<Event, Long> implements EventRepository {
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
 
     @Value("${event.repository.max.results:10000}")
     public int maxResults;
 
-    public EventRepositoryImpl(@Autowired EntityManager em) {
+    public EventRepositoryImpl(EntityManager em) {
         super(Event.class, em);
         entityManager = em;
     }
@@ -174,7 +164,7 @@ public class EventRepositoryImpl extends SimpleJpaRepository<Event, Long> implem
 
 
         Query query = entityManager.createNativeQuery(sb.toString(), JobEvent.class);
-        params.forEach((param, value) -> query.setParameter(param, value));
+        params.forEach(query::setParameter);
         query.setMaxResults(maxExportResults);
         return query.getResultList();
     }
@@ -223,12 +213,12 @@ public class EventRepositoryImpl extends SimpleJpaRepository<Event, Long> implem
     public List<JobEvent> getJobEventsByActionAndType(String action, String type){
         StringBuilder sb = new StringBuilder("SELECT e FROM JobEvent e WHERE ");
         Map<String, Object> params = new HashMap<>();
-        if (!StringUtils.isEmpty(action)) {
+        if (StringUtils.isNotEmpty(action)) {
             params.put("action", action);
             sb.append("e.action = :action ");
         }
 
-        if (!StringUtils.isEmpty(type)) {
+        if (StringUtils.isNotEmpty(type)) {
             params.put("type", type);
             sb.append("and e.type = :type ");
         }

@@ -18,6 +18,8 @@ package no.rutebanken.nabu.rest.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
+import lombok.Getter;
+import lombok.Setter;
 import no.rutebanken.nabu.domain.event.ActionType;
 import org.apache.commons.lang3.StringUtils;
 
@@ -25,17 +27,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static no.rutebanken.nabu.domain.event.TimeTableAction.DATASPACE_TRANSFER;
-import static no.rutebanken.nabu.domain.event.TimeTableAction.EXPORT;
-import static no.rutebanken.nabu.domain.event.TimeTableAction.EXPORT_CONCERTO;
-import static no.rutebanken.nabu.domain.event.TimeTableAction.EXPORT_NETEX;
-import static no.rutebanken.nabu.domain.event.TimeTableAction.FILE_CLASSIFICATION;
-import static no.rutebanken.nabu.domain.event.TimeTableAction.FILE_TRANSFER;
-import static no.rutebanken.nabu.domain.event.TimeTableAction.IMPORT;
-import static no.rutebanken.nabu.domain.event.TimeTableAction.VALIDATION_LEVEL_1;
-import static no.rutebanken.nabu.domain.event.TimeTableAction.VALIDATION_LEVEL_2;
+import static no.rutebanken.nabu.domain.event.TimeTableAction.*;
 
 @JsonRootName("jobs")
+@Getter
+@Setter
 public class JobStatus {
 
     public enum State {
@@ -43,7 +39,7 @@ public class JobStatus {
     }
 
     @JsonProperty("events")
-    private List<JobStatusEvent> events = new ArrayList<JobStatusEvent>();
+    private List<JobStatusEvent> events = new ArrayList<>();
 
     @JsonProperty("correlationId")
     private String correlationId;
@@ -75,92 +71,8 @@ public class JobStatus {
     @JsonProperty("type")
     private String type;
 
-    public List<JobStatusEvent> getEvents() {
-        return events;
-    }
-
     public void addEvent(JobStatusEvent event) {
         events.add(event);
-    }
-
-    public String getCorrelationId() {
-        return correlationId;
-    }
-
-    public void setCorrelationId(String correlationId) {
-        this.correlationId = correlationId;
-    }
-
-    public Date getFirstEvent() {
-        return firstEvent;
-    }
-
-    public void setFirstEvent(Date firstEvent) {
-        this.firstEvent = firstEvent;
-    }
-
-    public Date getLastEvent() {
-        return lastEvent;
-    }
-
-    public void setLastEvent(Date lastEvent) {
-        this.lastEvent = lastEvent;
-    }
-
-    public State getEndStatus() {
-        return endStatus;
-    }
-
-    public void setEndStatus(State endStatus) {
-        this.endStatus = endStatus;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    public Long getDurationMillis() {
-        return durationMillis;
-    }
-
-    public void setDurationMillis(Long durationMillis) {
-        this.durationMillis = durationMillis;
-    }
-
-    public Long getProviderId() {
-        return providerId;
-    }
-
-    public void setProviderId(Long providerId) {
-        this.providerId = providerId;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     @JsonIgnore

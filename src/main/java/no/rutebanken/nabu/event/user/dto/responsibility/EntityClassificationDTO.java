@@ -15,14 +15,15 @@
 
 package no.rutebanken.nabu.event.user.dto.responsibility;
 
+import lombok.Getter;
+import lombok.Setter;
 import no.rutebanken.nabu.event.user.dto.TypeDTO;
 
+@Getter
+@Setter
 public class EntityClassificationDTO extends TypeDTO {
 
-    public TypeDTO entityType;
+    private TypeDTO entityType;
 
-    public TypeDTO getEntityType() {
-        return entityType;
-    }
 }
 

@@ -18,47 +18,50 @@ package no.rutebanken.nabu.jms.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import no.rutebanken.nabu.domain.event.JobState;
+import lombok.Getter;
+import lombok.Setter;
 import org.wololo.geojson.Geometry;
 
 import java.io.IOException;
 import java.time.Instant;
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Getter
+@Setter
 public class CrudEventDTO {
 
-    public Instant eventTime;
+    private Instant eventTime;
 
-    public String correlationId;
+    private String correlationId;
 
-    public String entityType;
+    private String entityType;
 
-    public String entityClassifier;
+    private String entityClassifier;
 
-    public String action;
+    private String action;
 
-    public String externalId;
+    private String externalId;
 
-    public Long version;
+    private Long version;
 
-    public String name;
+    private String name;
 
-    public String changeType;
+    private String changeType;
 
-    public String oldValue;
+    private String oldValue;
 
-    public String newValue;
+    private String newValue;
 
-    public String comment;
+    private String comment;
 
-    public String username;
+    private String username;
 
-    public Geometry geometry;
+    private Geometry geometry;
 
-    public String location;
+    private String location;
 
-    public String description;
+    private String description;
 
-    public String type;
+    private String type;
 
     public static CrudEventDTO fromString(String string) {
         try {

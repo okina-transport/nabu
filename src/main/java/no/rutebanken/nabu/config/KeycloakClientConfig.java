@@ -15,6 +15,7 @@
 
 package no.rutebanken.nabu.config;
 
+import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,7 +39,14 @@ public class KeycloakClientConfig {
 
     @Bean
     public Keycloak keycloakClient() {
-        return KeycloakBuilder.builder().clientId(clientId).clientSecret(clientSecret)
-                       .realm(realm).serverUrl(authServerUrl).grantType("client_credentials").build();
+        return KeycloakBuilder.builder()
+                .clientId(clientId)
+                .clientSecret(clientSecret)
+                .realm(realm)
+                .serverUrl(authServerUrl)
+                .resteasyClient(new ResteasyClientBuilderImpl()
+                        .connectionPoolSize(10)
+                        .build())
+                .grantType("client_credentials").build();
     }
 }

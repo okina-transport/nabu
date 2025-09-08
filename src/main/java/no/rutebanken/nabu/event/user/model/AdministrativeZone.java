@@ -15,31 +15,18 @@
 
 package no.rutebanken.nabu.event.user.model;
 
-import com.vividsolutions.jts.geom.Polygon;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import org.locationtech.jts.geom.Polygon;
 
+@Getter
+@AllArgsConstructor
 public class AdministrativeZone {
 
-    private String id;
+    private final String id;
 
-    private String name;
+    private final String name;
 
-    private Polygon polygon;
+    private final Polygon polygon;
 
-    public AdministrativeZone(String id, String name, Polygon polygon) {
-        this.id = id;
-        this.name = name;
-        this.polygon = polygon;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Polygon getPolygon() {
-        return polygon;
-    }
 }

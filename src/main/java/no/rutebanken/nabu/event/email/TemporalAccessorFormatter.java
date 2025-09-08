@@ -27,7 +27,7 @@ import java.time.temporal.TemporalAccessor;
 import java.util.List;
 
 public class TemporalAccessorFormatter implements TemplateMethodModelEx {
-    private final static DateTimeFormatter FORMATTER = new DateTimeFormatterBuilder().appendPattern("yyyy-MM-dd HH:mm:ss").toFormatter()
+    private static final DateTimeFormatter FORMATTER = new DateTimeFormatterBuilder().appendPattern("yyyy-MM-dd HH:mm:ss").toFormatter()
                                                                .withZone(ZoneId.of("Europe/Oslo"));
 
 
@@ -40,13 +40,13 @@ public class TemporalAccessorFormatter implements TemplateMethodModelEx {
         if (arguments.size() > 1) {
             throw new TemplateModelException("Wrong number of arguments");
         }
-        StringModel arg = (StringModel) arguments.get(0);
+        StringModel arg = (StringModel) arguments.getFirst();
         Object obj = arg.getWrappedObject();
         if (obj == null) {
             return "";
         }
-        if (obj instanceof TemporalAccessor) {
-            return FORMATTER.format((TemporalAccessor) obj);
+        if (obj instanceof TemporalAccessor temporalAccessor) {
+            return FORMATTER.format(temporalAccessor);
         }
         throw new TemplateModelException("Invalid TemporalAccessor value '" + obj + "'");
     }

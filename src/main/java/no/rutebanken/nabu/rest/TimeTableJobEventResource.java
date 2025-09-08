@@ -15,7 +15,9 @@
 
 package no.rutebanken.nabu.rest;
 
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
+import jakarta.ws.rs.*;
 import no.rutebanken.nabu.domain.event.ActionType;
 import no.rutebanken.nabu.domain.event.JobEvent;
 import no.rutebanken.nabu.domain.event.JobState;
@@ -27,11 +29,9 @@ import no.rutebanken.nabu.rest.domain.JobStatusEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.*;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -44,18 +44,23 @@ import static org.rutebanken.helper.organisation.AuthorizationConstants.ROLE_ROU
 @Component
 @Produces("application/json")
 @Path("timetable")
-@Api(tags = {"Timetable job event resource"}, produces = "application/json")
+@Tags(value = {
+        @Tag(name = "TimeTableJobEventResource", description = "Timetable job event resource")
+})
 public class TimeTableJobEventResource {
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
-    @Autowired
-    private EventService eventService;
-
-    @Autowired
-    private ProviderRepository providerRepository;
+    private static final Logger logger = LoggerFactory.getLogger(TimeTableJobEventResource.class);
 
     private static final String STATUS_JOB_TYPE = JobEvent.JobDomain.TIMETABLE.name();
+
+    private final EventService eventService;
+
+    private final ProviderRepository providerRepository;
+
+    public TimeTableJobEventResource(EventService eventService, ProviderRepository providerRepository) {
+        this.eventService = eventService;
+        this.providerRepository = providerRepository;
+    }
 
     @GET
     @Path("/{providerId}")
@@ -67,16 +72,12 @@ public class TimeTableJobEventResource {
                                       @QueryParam("latest") boolean latest,
                                       @QueryParam("excludeType") String excludeType) {
 
-        if (providerId == null) {
-            logger.debug("Returning status for all providers");
-        } else {
-            logger.debug("Returning status for provider with id '" + providerId + "'");
-        }
+        debugMessageFromInputProvider(providerId);
 
         Instant instantFrom = from == null ? null : Instant.parse(from);
         Instant instantTo = to == null ? null : Instant.parse(to);
 
-        List<String> externalIds = jobIds == null ? null : jobIds.stream().map(jobId -> jobId.toString()).collect(Collectors.toList());
+        List<String> externalIds = jobIds == null ? null : jobIds.stream().map(Object::toString).collect(Collectors.toList());
         List<Long> relatedProviderIds = mapToAllRelatedProviderIds(providerId);
         try {
             List<JobEvent> eventsForProvider = eventService.findTimetableJobEvents(relatedProviderIds, instantFrom, instantTo,
@@ -96,11 +97,7 @@ public class TimeTableJobEventResource {
                                       @QueryParam("maxResults") Integer maxResults) {
 
 
-        if (providerId == null) {
-            logger.debug("Returning status for all providers");
-        } else {
-            logger.debug("Returning status for provider with id '" + providerId + "'");
-        }
+        debugMessageFromInputProvider(providerId);
 
         if (maxResults == null){
             maxResults = 20;
@@ -114,10 +111,7 @@ public class TimeTableJobEventResource {
             ActionType actionType = null;
             if ("gtfs".equals(exportType)){
                 actionType = ActionType.EXPORTER;
-            }else if ("netex".equals(exportType)){
-                actionType = null;
             }
-
 
             return convert(eventsForProvider, actionType, false, null, null);
         } catch (Exception e) {
@@ -127,6 +121,15 @@ public class TimeTableJobEventResource {
 
 
     }
+
+    private static void debugMessageFromInputProvider(Long providerId) {
+        if (providerId == null) {
+            logger.debug("Returning status for all providers");
+        } else {
+            logger.debug("Returning status for provider with id {}", providerId);
+        }
+    }
+
     /**
      * Return all ids for providers related to a given provider, that is the provider it self + either the provider that it migrates to or the provider that migrates to it.
      */
@@ -224,9 +227,7 @@ public class TimeTableJobEventResource {
 
                 if (ActionType.VALIDATOR.equals(actionType)) {
                     // validation job events might include export event: we don't want to include export events so that JobStatus.getActionType returns the correct action type
-                    if (actions != null && ActionType.VALIDATOR.equals(actionType) && actions.contains(in.getAction())) {
-                        currentAggregation.addEvent(JobStatusEvent.createFromJobEvent(in));
-                    } else if (actions == null) {
+                    if (actions == null || actions.contains(in.getAction())) {
                         currentAggregation.addEvent(JobStatusEvent.createFromJobEvent(in));
                     }
                 } else {
@@ -237,7 +238,7 @@ public class TimeTableJobEventResource {
 
         for (JobStatus agg : list) {
             if(!agg.getEvents().isEmpty()) {
-                JobStatusEvent event = agg.getEvents().get(agg.getEvents().size() - 1);
+                JobStatusEvent event = agg.getEvents().getLast();
                 agg.setLastEvent(event.date);
                 agg.setEndStatus(event.state);
                 long durationMillis = agg.getLastEvent().getTime() - agg.getFirstEvent().getTime();
@@ -248,24 +249,24 @@ public class TimeTableJobEventResource {
 
         list = list.stream().filter(agg -> !agg.getEvents().isEmpty()).collect(Collectors.toList());
 
-        Collections.sort(list, Comparator.comparing(JobStatus::getFirstEvent));
+        list.sort(Comparator.comparing(JobStatus::getFirstEvent));
 
         if (actionType != null && !list.isEmpty()) {
             if(latest) {
                 List<JobStatus> jobStatusFiltered = list.stream()
                         .filter(event -> event.getActionType().equals(actionType))
-                        .collect(Collectors.toList());
-                return Collections.singletonList(jobStatusFiltered.get(jobStatusFiltered.size() - 1));
+                        .toList();
+                return Collections.singletonList(jobStatusFiltered.getLast());
             }
             else {
                 return list.stream()
                         .filter(event -> event.getActionType().equals(actionType))
-                        .collect(Collectors.toList());
+                        .toList();
             }
         }
 
         if (latest && !list.isEmpty()) {
-            return Collections.singletonList(list.get(list.size() - 1));
+            return Collections.singletonList(list.getLast());
         }
 
         return list;

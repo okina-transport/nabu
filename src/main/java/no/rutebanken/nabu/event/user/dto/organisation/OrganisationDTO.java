@@ -16,16 +16,20 @@
 package no.rutebanken.nabu.event.user.dto.organisation;
 
 
+import lombok.Getter;
+import lombok.Setter;
 import no.rutebanken.nabu.event.user.dto.BaseDTO;
 
+@Getter
+@Setter
 public class OrganisationDTO extends BaseDTO {
 
 	public enum OrganisationType {AUTHORITY}
 
-	public String name;
+	private String name;
 
-	public Long companyNumber;
+	private Long companyNumber;
 
-	public OrganisationType organisationType;
+	private OrganisationType organisationType;
 
 }

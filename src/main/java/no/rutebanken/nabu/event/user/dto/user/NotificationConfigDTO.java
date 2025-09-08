@@ -16,35 +16,21 @@
 package no.rutebanken.nabu.event.user.dto.user;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import no.rutebanken.nabu.domain.event.NotificationType;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Getter
+@Setter
+@AllArgsConstructor
 public class NotificationConfigDTO {
 
-    public NotificationType notificationType;
+    private NotificationType notificationType;
 
-    public EventFilterDTO eventFilter;
+    private EventFilterDTO eventFilter;
 
-    public boolean enabled = true;
+    private boolean enabled;
 
-    public NotificationConfigDTO(NotificationType notificationType, boolean enabled, EventFilterDTO eventFilter) {
-        this.notificationType = notificationType;
-        this.enabled = enabled;
-        this.eventFilter = eventFilter;
-    }
-
-    public NotificationConfigDTO() {
-    }
-
-    public NotificationType getNotificationType() {
-        return notificationType;
-    }
-
-    public EventFilterDTO getEventFilter() {
-        return eventFilter;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
 }

@@ -15,23 +15,22 @@
 
 package no.rutebanken.nabu.repository;
 
+import jakarta.persistence.EntityManager;
 import no.rutebanken.nabu.domain.event.Notification;
 import no.rutebanken.nabu.domain.event.NotificationType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import java.util.List;
 
 @Repository
 @Transactional
 public class NotificationRepositoryImpl extends SimpleJpaRepository<Notification, Long> implements NotificationRepository {
 
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
 
-    public NotificationRepositoryImpl(@Autowired EntityManager em) {
+    public NotificationRepositoryImpl(EntityManager em) {
         super(Notification.class, em);
         entityManager = em;
     }

@@ -15,20 +15,20 @@
 
 package no.rutebanken.nabu.rest;
 
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import no.rutebanken.nabu.domain.SystemJobStatus;
 import no.rutebanken.nabu.repository.SystemJobStatusRepository;
 import no.rutebanken.nabu.rest.domain.SystemStatusAggregation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -37,18 +37,23 @@ import java.util.Map;
 @Component
 @Produces("application/json")
 @Path("admin_summary")
-@Api(tags = {"Admin summary resource"}, produces = "application/json")
+@Tags(value = {
+        @Tag(name = "AdminSummaryResource", description = "Admin summary resource")
+})
 public class AdminSummaryResource {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
-    private SystemJobStatusRepository systemJobStatusRepository;
+    private final SystemJobStatusRepository systemJobStatusRepository;
+
+    public AdminSummaryResource(SystemJobStatusRepository systemJobStatusRepository) {
+        this.systemJobStatusRepository = systemJobStatusRepository;
+    }
 
 
     @GET
     @Path("/status/aggregation")
     public Collection<SystemStatusAggregation> getLatestSystemStatus(@QueryParam("jobDomain") List<String> jobDomains,
-                                                                            @QueryParam("jobType") List<String> jobTypes
+                                                                     @QueryParam("jobType") List<String> jobTypes
     ) {
         logger.debug("Returning aggregated system status");
         try {

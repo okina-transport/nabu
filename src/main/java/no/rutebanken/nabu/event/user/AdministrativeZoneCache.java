@@ -17,33 +17,29 @@ package no.rutebanken.nabu.event.user;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.vividsolutions.jts.geom.Polygon;
+import jakarta.annotation.PostConstruct;
 import no.rutebanken.nabu.event.user.dto.organisation.AdministrativeZoneDTO;
 import no.rutebanken.nabu.event.user.model.AdministrativeZone;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.locationtech.jts.geom.Polygon;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.wololo.jts2geojson.GeoJSONReader;
 
-import javax.annotation.PostConstruct;
-
 @Service
 public class AdministrativeZoneCache implements AdministrativeZoneRepository {
-    private GeoJSONReader reader = new GeoJSONReader();
 
-    @Autowired
-    private AdministrativeZoneResource administrativeZoneResource;
+    private final GeoJSONReader reader = new GeoJSONReader();
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
-
+    private final AdministrativeZoneResource administrativeZoneResource;
 
     @Value("${administrative.zone.cache.max.size:100}")
     private Integer cacheMaxSize;
 
-
     private Cache<String, AdministrativeZone> cache;
+
+    public AdministrativeZoneCache(AdministrativeZoneResource administrativeZoneResource) {
+        this.administrativeZoneResource = administrativeZoneResource;
+    }
 
     @PostConstruct
     void init() {
@@ -59,7 +55,7 @@ public class AdministrativeZoneCache implements AdministrativeZoneRepository {
             if (dto == null) {
                 return null;
             }
-            administrativeZone = new AdministrativeZone(dto.id, dto.name, (Polygon) reader.read(dto.polygon));
+            administrativeZone = new AdministrativeZone(dto.getId(), dto.getName(), (Polygon) reader.read(dto.getPolygon()));
             cache.put(id, administrativeZone);
         }
 

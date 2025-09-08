@@ -17,7 +17,6 @@ package no.rutebanken.nabu.event.user;
 
 import no.rutebanken.nabu.event.user.dto.organisation.AdministrativeZoneDTO;
 import no.rutebanken.nabu.security.TokenService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -31,15 +30,19 @@ public class AdministrativeZoneResource {
     @Value("${administrative.zone.registry.rest.service.url:http://baba/services/organisations/administrative_zones/}")
     private String restServiceUrl;
 
-    @Autowired
-    private TokenService tokenService;
+    private final TokenService tokenService;
 
-    private RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
+
+    public AdministrativeZoneResource(TokenService tokenService) {
+        this.tokenService = tokenService;
+        this.restTemplate =  new RestTemplate();
+    }
 
     public AdministrativeZoneDTO getAdministrativeZone(String id) {
         ResponseEntity<AdministrativeZoneDTO> rateResponse =
                 restTemplate.exchange(restServiceUrl + id,
-                        HttpMethod.GET, tokenService.getEntityWithAuthenticationToken(), new ParameterizedTypeReference<AdministrativeZoneDTO>() {
+                        HttpMethod.GET, tokenService.getEntityWithAuthenticationToken(), new ParameterizedTypeReference<>() {
                         });
         return rateResponse.getBody();
     }

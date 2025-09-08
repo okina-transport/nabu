@@ -15,15 +15,11 @@
 
 package no.rutebanken.nabu.rest;
 
-import io.swagger.annotations.Api;
-import no.rutebanken.nabu.domain.event.CrudEvent;
-import no.rutebanken.nabu.domain.event.Event;
-import no.rutebanken.nabu.domain.event.GeoCoderAction;
-import no.rutebanken.nabu.domain.event.JobEvent;
-import no.rutebanken.nabu.domain.event.JobState;
-import no.rutebanken.nabu.domain.event.Notification;
-import no.rutebanken.nabu.domain.event.NotificationType;
-import no.rutebanken.nabu.domain.event.TimeTableAction;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.ws.rs.*;
+import no.rutebanken.nabu.domain.event.*;
 import no.rutebanken.nabu.event.ScheduledNotificationService;
 import no.rutebanken.nabu.event.filter.EventMatcher;
 import no.rutebanken.nabu.event.user.dto.user.EventFilterDTO;
@@ -31,18 +27,11 @@ import no.rutebanken.nabu.repository.NotificationRepository;
 import no.rutebanken.nabu.rest.domain.ApiCrudEvent;
 import no.rutebanken.nabu.rest.domain.ApiJobEvent;
 import no.rutebanken.nabu.rest.domain.ApiNotification;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import javax.persistence.EntityNotFoundException;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -51,18 +40,26 @@ import java.util.stream.Collectors;
 @Component
 @Produces("application/json")
 @Path("notifications")
-@Api(tags = {"Notification resource"}, produces = "application/json")
+@Tags(value = {
+        @Tag(name = "NotificationResource", description = "Notification resource")
+})
 public class NotificationResource {
 
-    @Autowired
-    private NotificationRepository notificationRepository;
+    private final NotificationRepository notificationRepository;
+
+    private final ScheduledNotificationService scheduledNotificationService;
+
+    public NotificationResource(NotificationRepository notificationRepository, ScheduledNotificationService scheduledNotificationService) {
+        this.notificationRepository = notificationRepository;
+        this.scheduledNotificationService = scheduledNotificationService;
+    }
 
     @GET
     @Path("/{userName}")
     @PreAuthorize("#userName == authentication.name")
     public List<ApiNotification> getWebNotificationsForUser(@PathParam("userName") String userName) {
         List<Notification> notifications = notificationRepository.findByUserNameAndTypeAndStatus(userName, NotificationType.WEB, Notification.NotificationStatus.READY);
-        return notifications.stream().map(notification -> toDTO(notification)).collect(Collectors.toList());
+        return notifications.stream().map(this::toDTO).toList();
     }
 
 
@@ -72,18 +69,12 @@ public class NotificationResource {
     @PreAuthorize("#userName == authentication.name")
     public void markAsRead(@PathParam("userName") String userName, List<Long> notificationPks) {
         if (!CollectionUtils.isEmpty(notificationPks)) {
-            List<Notification> notifications = notificationPks.stream().map(pk -> notificationRepository.getOne(pk)).filter(n -> n.getUserName().equals(userName)).collect(Collectors.toList());
+            List<Notification> notifications = notificationPks.stream().map(notificationRepository::getOne).filter(n -> n.getUserName().equals(userName)).collect(Collectors.toList());
 
             notifications.forEach(n -> n.setStatus(Notification.NotificationStatus.COMPLETE));
-            notificationRepository.save(notifications);
+            notificationRepository.saveAll(notifications);
         }
     }
-
-
-    // TODO tmp service until scheduling?
-
-    @Autowired
-    private ScheduledNotificationService scheduledNotificationService;
 
     @POST
     @Path("/email")
@@ -120,16 +111,16 @@ public class NotificationResource {
     @GET
     @Path("job_actions/{jobDomain}")
     public List<String> getJobActions(@PathParam("jobDomain") JobEvent.JobDomain jobDomain) {
-        List<String> actions = new ArrayList<>(Arrays.asList(EventMatcher.ALL_TYPES));
+        List<String> actions = new ArrayList<>(List.of(EventMatcher.ALL_TYPES));
 
         if (JobEvent.JobDomain.GRAPH.equals(jobDomain)) {
             actions.addAll(Arrays.asList("BUILD_BASE", "BUILD_GRAPH"));
         } else if (JobEvent.JobDomain.TIAMAT.equals(jobDomain)) {
-            actions.addAll(Arrays.asList("EXPORT"));
+            actions.add("EXPORT");
         } else if (JobEvent.JobDomain.GEOCODER.equals(jobDomain)) {
-            actions.addAll(Arrays.stream(GeoCoderAction.values()).map(value -> value.name()).collect(Collectors.toList()));
+            actions.addAll(Arrays.stream(GeoCoderAction.values()).map(Enum::name).toList());
         } else if (JobEvent.JobDomain.TIMETABLE.equals(jobDomain)) {
-            actions.addAll(Arrays.stream(TimeTableAction.values()).map(value -> value.name()).collect(Collectors.toList()));
+            actions.addAll(Arrays.stream(TimeTableAction.values()).map(Enum::name).toList());
         } else if (JobEvent.JobDomain.TIMETABLE_PUBLISH.equals(jobDomain)) {
             actions.addAll(Arrays.asList("EXPORT_NETEX_MERGED", "EXPORT_GOOGLE_GTFS"));
         } else {
@@ -141,15 +132,15 @@ public class NotificationResource {
 
     private ApiNotification toDTO(Notification notification) {
         ApiNotification dto = new ApiNotification();
-        dto.status = notification.getStatus();
-        dto.userName = notification.getUserName();
-        dto.id = notification.getPk();
+        dto.setStatus(notification.getStatus());
+        dto.setUserName(notification.getUserName());
+        dto.setId(notification.getPk());
         Event event = notification.getEvent();
 
-        if (event instanceof JobEvent) {
-            dto.jobEvent = ApiJobEvent.fromJobEvent((JobEvent) event);
-        } else if (event instanceof CrudEvent) {
-            dto.crudEvent = ApiCrudEvent.fromCrudEvent((CrudEvent) event);
+        if (event instanceof JobEvent jobEvent) {
+            dto.setJobEvent(ApiJobEvent.fromJobEvent(jobEvent));
+        } else if (event instanceof CrudEvent crudEvent) {
+            dto.setCrudEvent(ApiCrudEvent.fromCrudEvent(crudEvent));
         }
 
         return dto;
