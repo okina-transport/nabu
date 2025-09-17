@@ -20,7 +20,7 @@
     <parent>
         <groupId>com.okina.springboot</groupId>
         <artifactId>superpom</artifactId>
-        <version>2.0.13-SNAPSHOT</version>
+        <version>2.0.16-SNAPSHOT</version>
     </parent>
 
     <groupId>no.rutebanken</groupId>
@@ -41,8 +41,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <rutebanken.helpers.version>0.0.3-SNAPSHOT</rutebanken.helpers.version>
         <jackson-jaxrs-xml-provider.version>2.9.0</jackson-jaxrs-xml-provider.version>
-        <flyway-core.version>11.12.0</flyway-core.version>
-        <swagger-jersey2.version>2.2.36</swagger-jersey2.version>
         <assertj-core.version>3.27.4</assertj-core.version>
         <rest-assured.version>5.5.6</rest-assured.version>
         <geodb.version>0.9</geodb.version>
@@ -78,13 +76,12 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.40</version>
+
         </dependency>
 
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-            <version>${flyway-core.version}</version>
         </dependency>
 
         <dependency>
@@ -174,13 +171,11 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
-            <version>11.12.0</version>
         </dependency>
 
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-jaxrs2-jakarta</artifactId>
-            <version>${swagger-jersey2.version}</version>
         </dependency>
 
         <dependency>
@@ -207,6 +202,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
+            <version>42.7.8</version>
         </dependency>
 
         <dependency>
@@ -229,7 +225,6 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>33.4.8-jre</version>
         </dependency>
         <dependency>
             <groupId>org.freemarker</groupId>
