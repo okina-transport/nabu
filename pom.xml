@@ -50,7 +50,7 @@
         <wololo.version>0.18.1</wololo.version>
         <commons-io.version>2.20.0</commons-io.version>
         <openapi-generator-version>7.15.0</openapi-generator-version>
-        <hibernate.version>7.1.1.Final</hibernate.version>
+        <hibernate.version>7.1.2.Final</hibernate.version>
     </properties>
 
     <dependencies>
@@ -165,7 +165,6 @@
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-client</artifactId>
-            <version>6.2.12.Final</version>
         </dependency>
 
         <dependency>
@@ -176,6 +175,7 @@
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-jaxrs2-jakarta</artifactId>
+            <version>2.2.38</version>
         </dependency>
 
         <dependency>
