@@ -39,11 +39,13 @@ public class JobEvent extends Event {
 
     private String referential;
 
+    private String lugStatus;
+
 
     public JobEvent() {
     }
 
-    public JobEvent(String jobDomain, String name, Long providerId, String externalId, String action, JobState state, String correlationId, Instant eventTime, String referential) {
+    public JobEvent(String jobDomain, String name, Long providerId, String externalId, String action, JobState state, String correlationId, Instant eventTime, String referential, String lugStatus) {
         this.setDomain(jobDomain);
         this.setReferential(referential);
         this.setEventTime(eventTime);
@@ -91,6 +93,10 @@ public class JobEvent extends Event {
         this.referential = referential;
     }
 
+    public String getLugStatus() { return lugStatus; }
+
+    public void setLugStatus(String lugStatus) { this.lugStatus = lugStatus; }
+
 
     public static JobEventBuilder builder() {
         return new JobEventBuilder();
@@ -132,6 +138,11 @@ public class JobEvent extends Event {
             return this;
         }
 
+        public JobEventBuilder lugStatus(String lugStatus) {
+            event.lugStatus = lugStatus;
+            return this;
+        }
+
     }
 
     @Override
@@ -147,6 +158,7 @@ public class JobEvent extends Event {
                        ", name='" + getName() + '\'' +
                        ", externalId='" + getExternalId() + '\'' +
                        ", username='" + getUsername() + '\'' +
+                       ", lugStatus='" + getLugStatus() + '\'' +
                        '}';
     }
 }

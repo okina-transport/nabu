@@ -144,11 +144,13 @@ public class EventRepositoryImpl extends SimpleJpaRepository<Event, Long> implem
 
         String whereClause= "";
         if ("gtfs".equals(exportType)){
-            whereClause = " WHERE e2.action = 'EXPORT' AND e2.type = 'gtfs' ";
+            whereClause = " WHERE (e2.action = 'EXPORT' OR e2.action = 'EXPORT_TO_CONSUMER') AND e2.type = 'gtfs' ";
         }else if ("netex".equals(exportType)){
-            whereClause = " WHERE e2.action = 'EXPORT_NETEX' AND e2.type = 'netex' ";
+            whereClause = " WHERE (e2.action = 'EXPORT_NETEX' OR e2.action = 'EXPORT_TO_CONSUMER') AND e2.type = 'netex' ";
         }else if ("neptune".equals(exportType)) {
             whereClause = " WHERE e2.action = 'EXPORT' AND e2.type = 'neptune' ";
+        }else if ("arret".equals(exportType)) {
+            whereClause = " WHERE e2.action = 'EXPORT_TO_CONSUMER' AND e2.type = 'arret' ";
         }
 
         StringBuilder sb = new StringBuilder("SELECT e.* FROM event e WHERE pk in (");

@@ -53,6 +53,8 @@ public class JobEventDTO {
 
     private String type;
 
+    private String lugStatus;
+
     public static JobEventDTO fromString(String string) {
         try {
             ObjectMapper mapper = new ObjectMapper();
