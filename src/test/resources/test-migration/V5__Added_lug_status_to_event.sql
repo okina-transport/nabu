@@ -1,0 +1,1 @@
+ALTER TABLE event ADD COLUMN lug_status character varying(255);
