@@ -55,14 +55,14 @@ class TimeTableJobEventResourceTest extends BaseIntegrationTest {
         Instant t0 = Instant.now().minusMillis(2000);
 
         // Job "b" -> OK
-        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename2", 2L, null, EXPORT.toString(), JobState.PENDING, "b", t0.plusMillis(4), "ost"));
-        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename2", 2L, "1", EXPORT.toString(), JobState.STARTED, "b", t0.plusMillis(5), "pb"));
-        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename2", 2L, "1", EXPORT.toString(), JobState.OK, "b", t0.plusMillis(6), "pb"));
+        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename2", 2L, null, EXPORT.toString(), JobState.PENDING, "b", t0.plusMillis(4), "ost", null));
+        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename2", 2L, "1", EXPORT.toString(), JobState.STARTED, "b", t0.plusMillis(5), "pb", null));
+        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename2", 2L, "1", EXPORT.toString(), JobState.OK, "b", t0.plusMillis(6), "pb", null));
 
         // Job "a" -> FAILED
-        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename1", 2L, null, IMPORT.toString(), JobState.PENDING, "a", t0.plusMillis(1), "ost"));
-        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename1", 2L, "2", IMPORT.toString(), JobState.STARTED, "a", t0.plusMillis(2), "ost"));
-        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename1", 2L, "2", IMPORT.toString(), JobState.FAILED, "a", t0.plusMillis(3), "ost"));
+        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename1", 2L, null, IMPORT.toString(), JobState.PENDING, "a", t0.plusMillis(1), "ost", null));
+        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename1", 2L, "2", IMPORT.toString(), JobState.STARTED, "a", t0.plusMillis(2), "ost", null));
+        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename1", 2L, "2", IMPORT.toString(), JobState.FAILED, "a", t0.plusMillis(3), "ost", null));
 
 
         List<JobStatus> listStatus = new TimeTableJobEventResource(eventService, providerRepository).convert(rawEvents, null, false);
