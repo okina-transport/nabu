@@ -41,11 +41,13 @@ public class JobEvent extends Event {
 
     private String lugStatus;
 
+    private Boolean flexible;
+
 
     public JobEvent() {
     }
 
-    public JobEvent(String jobDomain, String name, Long providerId, String externalId, String action, JobState state, String correlationId, Instant eventTime, String referential, String lugStatus) {
+    public JobEvent(String jobDomain, String name, Long providerId, String externalId, String action, JobState state, String correlationId, Instant eventTime, String referential, String lugStatus, Boolean flexible) {
         this.setDomain(jobDomain);
         this.setReferential(referential);
         this.setEventTime(eventTime);
@@ -97,6 +99,12 @@ public class JobEvent extends Event {
 
     public void setLugStatus(String lugStatus) { this.lugStatus = lugStatus; }
 
+    public Boolean isFlexible() { return flexible; }
+
+    public void setFlexible(Boolean flex) {
+        this.flexible = flex;
+    }
+
 
     public static JobEventBuilder builder() {
         return new JobEventBuilder();
@@ -143,6 +151,11 @@ public class JobEvent extends Event {
             return this;
         }
 
+        public JobEventBuilder flexible(Boolean flexible) {
+            event.flexible = flexible;
+            return this;
+        }
+
     }
 
     @Override
@@ -159,6 +172,7 @@ public class JobEvent extends Event {
                        ", externalId='" + getExternalId() + '\'' +
                        ", username='" + getUsername() + '\'' +
                        ", lugStatus='" + getLugStatus() + '\'' +
+                       ", flexible='" + isFlexible() + '\'' +
                        '}';
     }
 }

@@ -56,9 +56,12 @@ public class JobStatusEvent {
     @JsonProperty("lugStatus")
     public String lugStatus;
 
+    @JsonProperty("flexible")
+    public Boolean flexible;
+
     public static JobStatusEvent createFromJobEvent(JobEvent e) {
         Long chouetteId = e.getExternalId() == null ? null : Long.parseLong(e.getExternalId());
         return new JobStatusEvent(State.valueOf(e.getState().name()), Date.from(e.getEventTime()), e.getAction(),
-                chouetteId, e.getReferential(), e.getType(), e.getName(), e.getDescription(), e.getLugStatus());
+                chouetteId, e.getReferential(), e.getType(), e.getName(), e.getDescription(), e.getLugStatus(), e.isFlexible());
     }
 }

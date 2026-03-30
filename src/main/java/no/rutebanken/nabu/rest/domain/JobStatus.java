@@ -71,6 +71,9 @@ public class JobStatus {
     @JsonProperty("type")
     private String type;
 
+    @JsonProperty("flexible")
+    private Boolean flexible;
+
     public void addEvent(JobStatusEvent event) {
         events.add(event);
     }

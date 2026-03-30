@@ -1,0 +1,1 @@
+ALTER TABLE event ADD COLUMN flexible boolean default false;

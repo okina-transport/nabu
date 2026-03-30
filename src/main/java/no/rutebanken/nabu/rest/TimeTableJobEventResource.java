@@ -244,6 +244,7 @@ public class TimeTableJobEventResource {
                 long durationMillis = agg.getLastEvent().getTime() - agg.getFirstEvent().getTime();
                 agg.setDurationMillis(durationMillis);
                 agg.setType(event.type);
+                agg.setFlexible(event.getFlexible());
             }
         }
 

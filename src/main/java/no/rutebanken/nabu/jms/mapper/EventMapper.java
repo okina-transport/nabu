@@ -66,6 +66,7 @@ public class EventMapper {
         event.setDescription(dto.getDescription());
         event.setType(dto.getType());
         event.setLugStatus(dto.getLugStatus());
+        event.setFlexible(dto.getFlexible());
 
         return event;
     }
