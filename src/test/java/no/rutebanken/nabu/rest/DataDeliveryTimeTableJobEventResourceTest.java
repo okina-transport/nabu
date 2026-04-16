@@ -50,9 +50,9 @@ class DataDeliveryTimeTableJobEventResourceTest {
 
     @Test
     void testMapToDataDeliveryJobEventSuccess() {
-        JobEvent s1 = new JobEvent(JOB_DOMAIN, "file1.zip", 3L, "1", TimeTableAction.FILE_TRANSFER.toString(), JobState.OK, "corr-id-1", Instant.now(), "ost", null);
-        JobEvent s2 = new JobEvent(JOB_DOMAIN, "file1.zip", 3L, "1", TimeTableAction.BUILD_GRAPH.toString(), JobState.OK, "corr-id-1", Instant.now().plusMillis(1000), "ost", null);
-        JobEvent s3 = new JobEvent(JOB_DOMAIN, "file1.zip", 3L, "1", TimeTableAction.EXPORT_NETEX.toString(), JobState.PENDING, "corr-id-1", Instant.now().plusMillis(2000), "ost", null);
+        JobEvent s1 = new JobEvent(JOB_DOMAIN, "file1.zip", 3L, "1", TimeTableAction.FILE_TRANSFER.toString(), JobState.OK, "corr-id-1", Instant.now(), "ost", null, false);
+        JobEvent s2 = new JobEvent(JOB_DOMAIN, "file1.zip", 3L, "1", TimeTableAction.BUILD_GRAPH.toString(), JobState.OK, "corr-id-1", Instant.now().plusMillis(1000), "ost", null, false);
+        JobEvent s3 = new JobEvent(JOB_DOMAIN, "file1.zip", 3L, "1", TimeTableAction.EXPORT_NETEX.toString(), JobState.PENDING, "corr-id-1", Instant.now().plusMillis(2000), "ost", null, false);
         DataDeliveryStatus dataDeliveryJobEvent = new LatestUploadResource(eventRepository).toDataDeliveryStatus(Arrays.asList(s1, s2, s3));
 
         assertThat(dataDeliveryJobEvent.getDate().toInstant().truncatedTo(ChronoUnit.MILLIS))
@@ -62,9 +62,9 @@ class DataDeliveryTimeTableJobEventResourceTest {
 
     @Test
     void testMapToDataDeliveryJobEventInProgress() {
-        JobEvent s1 = new JobEvent(JOB_DOMAIN, "file1.zip", 3L, "1", TimeTableAction.FILE_TRANSFER.toString(), JobState.OK, "corr-id-1", Instant.now(), "ost", null);
-        JobEvent s2 = new JobEvent(JOB_DOMAIN, "file1.zip", 3L, "1", TimeTableAction.BUILD_GRAPH.toString(), JobState.STARTED, "corr-id-1", Instant.now().plusMillis(1000), "ost", null);
-        JobEvent s3 = new JobEvent(JOB_DOMAIN, "file1.zip", 3L, "1", TimeTableAction.EXPORT_NETEX.toString(), JobState.OK, "corr-id-1", Instant.now().plusMillis(2000), "ost", null);
+        JobEvent s1 = new JobEvent(JOB_DOMAIN, "file1.zip", 3L, "1", TimeTableAction.FILE_TRANSFER.toString(), JobState.OK, "corr-id-1", Instant.now(), "ost", null, false);
+        JobEvent s2 = new JobEvent(JOB_DOMAIN, "file1.zip", 3L, "1", TimeTableAction.BUILD_GRAPH.toString(), JobState.STARTED, "corr-id-1", Instant.now().plusMillis(1000), "ost", null, false);
+        JobEvent s3 = new JobEvent(JOB_DOMAIN, "file1.zip", 3L, "1", TimeTableAction.EXPORT_NETEX.toString(), JobState.OK, "corr-id-1", Instant.now().plusMillis(2000), "ost", null, false);
         DataDeliveryStatus dataDeliveryJobEvent = new LatestUploadResource(eventRepository).toDataDeliveryStatus(Arrays.asList(s1, s2, s3));
 
         assertThat(dataDeliveryJobEvent.getDate().toInstant().truncatedTo(ChronoUnit.MILLIS))
@@ -74,8 +74,8 @@ class DataDeliveryTimeTableJobEventResourceTest {
 
     @Test
     void testMapToDataDeliveryJobEventFailed() {
-        JobEvent s1 = new JobEvent(JOB_DOMAIN, "file1.zip", 3L, "1", TimeTableAction.FILE_TRANSFER.toString(), JobState.OK, "corr-id-1", Instant.now(), "ost", null);
-        JobEvent s2 = new JobEvent(JOB_DOMAIN, "file1.zip", 3L, "1", TimeTableAction.FILE_CLASSIFICATION.toString(), JobState.FAILED, "corr-id-1", Instant.now().plusMillis(1000), "ost", null);
+        JobEvent s1 = new JobEvent(JOB_DOMAIN, "file1.zip", 3L, "1", TimeTableAction.FILE_TRANSFER.toString(), JobState.OK, "corr-id-1", Instant.now(), "ost", null, false);
+        JobEvent s2 = new JobEvent(JOB_DOMAIN, "file1.zip", 3L, "1", TimeTableAction.FILE_CLASSIFICATION.toString(), JobState.FAILED, "corr-id-1", Instant.now().plusMillis(1000), "ost", null, false);
         DataDeliveryStatus dataDeliveryJobEvent = new LatestUploadResource(eventRepository).toDataDeliveryStatus(Arrays.asList(s1, s2));
 
         assertThat(dataDeliveryJobEvent.getDate().toInstant().truncatedTo(ChronoUnit.MILLIS))

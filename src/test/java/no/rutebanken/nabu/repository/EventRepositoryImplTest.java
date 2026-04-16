@@ -39,7 +39,7 @@ class EventRepositoryImplTest extends BaseIntegrationTest {
 
     @Test
     void testUpdate() {
-        JobEvent input = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "00013-gtfs.zip", 2L, "1", TimeTableAction.IMPORT.toString(), JobState.OK, "1234567", now, "ost", null);
+        JobEvent input = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "00013-gtfs.zip", 2L, "1", TimeTableAction.IMPORT.toString(), JobState.OK, "1234567", now, "ost", null, false);
 
         assertDoesNotThrow(() -> repository.save(input));
     }
@@ -48,9 +48,9 @@ class EventRepositoryImplTest extends BaseIntegrationTest {
     void testFindJobEventsForProvider() {
         JobEvent s1 = JobEvent.builder().domain(JobEvent.JobDomain.TIMETABLE).providerId(2L).referential("ost").state(JobState.OK).name("file1.zip").externalId("1").action(TimeTableAction.IMPORT).correlationId("corr-id-1").eventTime(now).build();
         repository.save(s1);
-        JobEvent s2 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file1.zip", 2L, "2", TimeTableAction.EXPORT.toString(), JobState.FAILED, "corr-id-1", now.plus(1, ChronoUnit.MINUTES), "ost", null);
+        JobEvent s2 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file1.zip", 2L, "2", TimeTableAction.EXPORT.toString(), JobState.FAILED, "corr-id-1", now.plus(1, ChronoUnit.MINUTES), "ost", null, false);
         repository.save(s2);
-        JobEvent s3 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file2.zip", 3L, "1", TimeTableAction.IMPORT.toString(), JobState.TIMEOUT, "corr-id-2", now, "ost", null);
+        JobEvent s3 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file2.zip", 3L, "1", TimeTableAction.IMPORT.toString(), JobState.TIMEOUT, "corr-id-2", now, "ost", null, false);
         repository.save(s3);
         Collection<JobEvent> eventsForProvider2 = repository.findTimetableJobEvents(List.of(2L), null, null, null, null, null, null);
         assertThat(eventsForProvider2).hasSize(2);
@@ -62,11 +62,11 @@ class EventRepositoryImplTest extends BaseIntegrationTest {
 
     @Test
     void testGetStatusWithAllCriteria() {
-        JobEvent s1 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file1.zip", 3L, "1", TimeTableAction.IMPORT.toString(), JobState.OK, "corr-id-1", now, "ost", null);
+        JobEvent s1 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file1.zip", 3L, "1", TimeTableAction.IMPORT.toString(), JobState.OK, "corr-id-1", now, "ost", null, false);
         repository.save(s1);
-        JobEvent s2 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file1.zip", 3L, "2", TimeTableAction.EXPORT.toString(), JobState.FAILED, "corr-id-1", now.plus(1, ChronoUnit.MINUTES), "ost", null);
+        JobEvent s2 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file1.zip", 3L, "2", TimeTableAction.EXPORT.toString(), JobState.FAILED, "corr-id-1", now.plus(1, ChronoUnit.MINUTES), "ost", null, false);
         repository.save(s2);
-        JobEvent s3 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file2.zip", 3L, "1", TimeTableAction.IMPORT.toString(), JobState.TIMEOUT, "corr-id-2", now, "ost", null);
+        JobEvent s3 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file2.zip", 3L, "1", TimeTableAction.IMPORT.toString(), JobState.TIMEOUT, "corr-id-2", now, "ost", null, false);
         repository.save(s3);
 
         Collection<JobEvent> statusesQueryMatchingS1 = repository.findTimetableJobEvents(List.of(3L), now, now, Collections.singletonList(TimeTableAction.IMPORT.toString()), Collections.singletonList(JobState.OK), Collections.singletonList("1"), Collections.singletonList("file1.zip"));
@@ -80,13 +80,13 @@ class EventRepositoryImplTest extends BaseIntegrationTest {
 
     @Test
     void getLatestDeliveryStatusForProvider() {
-        JobEvent s1 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file1.zip", 3L, "1", TimeTableAction.FILE_TRANSFER.toString(), JobState.OK, "corr-id-1", now, "ost", null);
+        JobEvent s1 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file1.zip", 3L, "1", TimeTableAction.FILE_TRANSFER.toString(), JobState.OK, "corr-id-1", now, "ost", null, false);
         repository.save(s1);
-        JobEvent s2 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file1.zip", 3L, "2", TimeTableAction.EXPORT.toString(), JobState.FAILED, "corr-id-1", now.plus(1, ChronoUnit.MINUTES), "ost", null);
+        JobEvent s2 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file1.zip", 3L, "2", TimeTableAction.EXPORT.toString(), JobState.FAILED, "corr-id-1", now.plus(1, ChronoUnit.MINUTES), "ost", null, false);
         repository.save(s2);
-        JobEvent s3 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file2.zip", 3L, "1", TimeTableAction.FILE_TRANSFER.toString(), JobState.TIMEOUT, "corr-id-2", now.minus(1, ChronoUnit.MINUTES), "ost", null);
+        JobEvent s3 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file2.zip", 3L, "1", TimeTableAction.FILE_TRANSFER.toString(), JobState.TIMEOUT, "corr-id-2", now.minus(1, ChronoUnit.MINUTES), "ost", null, false);
         repository.save(s3);
-        JobEvent sReimport = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "reimport-file1.zip", 3L, "6", TimeTableAction.FILE_TRANSFER.toString(), JobState.TIMEOUT, "corr-id-3", now.plus(2, ChronoUnit.MINUTES), "ost", null);
+        JobEvent sReimport = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "reimport-file1.zip", 3L, "6", TimeTableAction.FILE_TRANSFER.toString(), JobState.TIMEOUT, "corr-id-3", now.plus(2, ChronoUnit.MINUTES), "ost", null, false);
         repository.save(sReimport);
 
         List<JobEvent> statusList = repository.getLatestTimetableFileTransfer(3L);
@@ -97,11 +97,11 @@ class EventRepositoryImplTest extends BaseIntegrationTest {
 
     @Test
     void testClearAll() {
-        JobEvent s1 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file1.zip", 3L, "1", TimeTableAction.IMPORT.toString(), JobState.OK, "corr-id-1", now, "ost", null);
+        JobEvent s1 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file1.zip", 3L, "1", TimeTableAction.IMPORT.toString(), JobState.OK, "corr-id-1", now, "ost", null, false);
         repository.save(s1);
-        JobEvent s2 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file1.zip", 4L, "2", TimeTableAction.EXPORT.toString(), JobState.FAILED, "corr-id-1", now.plus(1, ChronoUnit.MINUTES), "ost", null);
+        JobEvent s2 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file1.zip", 4L, "2", TimeTableAction.EXPORT.toString(), JobState.FAILED, "corr-id-1", now.plus(1, ChronoUnit.MINUTES), "ost", null, false);
         repository.save(s2);
-        JobEvent s3 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file2.zip", 3L, "1", TimeTableAction.IMPORT.toString(), JobState.TIMEOUT, "corr-id-2", now, "ost", null);
+        JobEvent s3 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file2.zip", 3L, "1", TimeTableAction.IMPORT.toString(), JobState.TIMEOUT, "corr-id-2", now, "ost", null, false);
         repository.save(s3);
 
         repository.clearAll(JobEvent.JobDomain.TIMETABLE.toString());
@@ -114,11 +114,11 @@ class EventRepositoryImplTest extends BaseIntegrationTest {
 
     @Test
     void testClearForProvider() {
-        JobEvent s1 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file1.zip", 3L, "1", TimeTableAction.IMPORT.toString(), JobState.OK, "corr-id-1", now, "ost", null);
+        JobEvent s1 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file1.zip", 3L, "1", TimeTableAction.IMPORT.toString(), JobState.OK, "corr-id-1", now, "ost", null, false);
         repository.save(s1);
-        JobEvent s2 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file1.zip", 4L, "2", TimeTableAction.EXPORT.toString(), JobState.FAILED, "corr-id-1", now.plus(1, ChronoUnit.MINUTES), "ost", null);
+        JobEvent s2 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file1.zip", 4L, "2", TimeTableAction.EXPORT.toString(), JobState.FAILED, "corr-id-1", now.plus(1, ChronoUnit.MINUTES), "ost", null, false);
         repository.save(s2);
-        JobEvent s3 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file2.zip", 3L, "1", TimeTableAction.IMPORT.toString(), JobState.TIMEOUT, "corr-id-2", now, "ost", null);
+        JobEvent s3 = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "file2.zip", 3L, "1", TimeTableAction.IMPORT.toString(), JobState.TIMEOUT, "corr-id-2", now, "ost", null, false);
         repository.save(s3);
 
         repository.clear(JobEvent.JobDomain.TIMETABLE.toString(), 3L);
