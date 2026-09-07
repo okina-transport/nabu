@@ -29,6 +29,8 @@ import java.util.Date;
 @Setter
 public class JobStatusEvent {
 
+    private static final String GTFS_FULL_FLEX_TYPE = "GTFS_FULL_FLEX";
+
     @JsonProperty("state")
     public State state;
 
@@ -40,6 +42,9 @@ public class JobStatusEvent {
 
     @JsonProperty("chouetteJobId")
     public Long chouetteJobId;
+
+    @JsonProperty("uttuJobId")
+    public Long uttuJobId;
 
     @JsonProperty("referential")
     public String referential;
@@ -60,8 +65,11 @@ public class JobStatusEvent {
     public Boolean flexible;
 
     public static JobStatusEvent createFromJobEvent(JobEvent e) {
-        Long chouetteId = e.getExternalId() == null ? null : Long.parseLong(e.getExternalId());
+        Long externalId = e.getExternalId() == null ? null : Long.parseLong(e.getExternalId());
+        boolean fullFlex = GTFS_FULL_FLEX_TYPE.equals(e.getType());
+        Long chouetteId = fullFlex ? null : externalId;
+        Long uttuId = fullFlex ? externalId : null;
         return new JobStatusEvent(State.valueOf(e.getState().name()), Date.from(e.getEventTime()), e.getAction(),
-                chouetteId, e.getReferential(), e.getType(), e.getName(), e.getDescription(), e.getLugStatus(), e.isFlexible());
+                chouetteId, uttuId, e.getReferential(), e.getType(), e.getName(), e.getDescription(), e.getLugStatus(), e.isFlexible());
     }
 }
