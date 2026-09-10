@@ -15,6 +15,7 @@
 
 package no.rutebanken.nabu.event;
 
+import com.google.common.collect.Lists;
 import no.rutebanken.nabu.domain.event.Event;
 import no.rutebanken.nabu.domain.event.JobEvent;
 import no.rutebanken.nabu.domain.event.JobState;
@@ -26,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -40,6 +42,7 @@ import java.util.stream.Collectors;
 public class EventService {
 
     private static final Logger logger = LoggerFactory.getLogger(EventService.class);
+    public static final int MAX_DELETE_BATCH_SIZE = 10_000;
 
     private final EventRepository eventRepository;
 
@@ -101,9 +104,20 @@ public class EventService {
             getOldJobEvents(jobs, keepDays, keepJobsPerReferential, idsEventToDelete);
         }
 
-        eventRepository.deleteAllByPk(idsEventToDelete);
+        logger.info("Found {} events to remove", idsEventToDelete.size());
 
-        logger.info("Removed old events. Count: {}", idsEventToDelete.size());
+        if (CollectionUtils.isEmpty(idsEventToDelete)) {
+            return;
+        }
+
+        var partitions = Lists.partition(idsEventToDelete, MAX_DELETE_BATCH_SIZE);
+
+        for (int i = 0; i < partitions.size(); i++) {
+            logger.info("Removing events batch {} / {}", i + 1, partitions.size());
+            eventRepository.deleteAllByPk(partitions.get(i));
+        }
+
+        logger.info("Removed {} events", idsEventToDelete.size());
     }
 
     private void getOldJobEvents(List<JobEvent> jobs, int keepDays, int keepJobsPerReferential, List<Long> idsEventToDelete) {
