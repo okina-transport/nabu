@@ -91,7 +91,8 @@ public class EventService {
         jobEventsMap.put(TimeTableAction.DATASPACE_TRANSFER.toString(), eventRepository.getJobEventsByActionAndType(TimeTableAction.DATASPACE_TRANSFER.toString(), null));
         jobEventsMap.put(TimeTableAction.VALIDATION_LEVEL_2.toString(), eventRepository.getJobEventsByActionAndType(TimeTableAction.VALIDATION_LEVEL_2.toString(), null));
         jobEventsMap.put(TimeTableAction.EXPORT.toString(), eventRepository.getJobEventsByActionAndType(TimeTableAction.EXPORT.toString(), "gtfs"));
-        jobEventsMap.put(TimeTableAction.EXPORT.toString(), eventRepository.getJobEventsByActionAndType(TimeTableAction.EXPORT.toString(), "neptune"));
+        jobEventsMap.put(TimeTableAction.EXPORT + "-neptune",
+                eventRepository.getJobEventsByActionAndType(TimeTableAction.EXPORT.toString(), "neptune"));
         jobEventsMap.put(TimeTableAction.EXPORT_NETEX.toString(), eventRepository.getJobEventsByActionAndType(TimeTableAction.EXPORT_NETEX.toString(), null));
 
         List<Long> idsEventToDelete = new ArrayList<>();
@@ -114,14 +115,14 @@ public class EventService {
 
 
         for (Map<String, List<JobEvent>> jobsEventMap : jobsEventMapGrouping.values()) {
-            if (jobsEventMap.values().size() > keepJobsPerReferential) {
-                int numberJobToDeleteGroupingByCorrelationId = jobsEventMap.values().size() - keepJobsPerReferential;
+            if (jobsEventMap.size() > keepJobsPerReferential) {
+                int numberJobToDeleteGroupingByCorrelationId = jobsEventMap.size() - keepJobsPerReferential;
                 for(List<JobEvent> jobEvents : jobsEventMap.values()){
                     ZonedDateTime ageLimit = ZonedDateTime.now().minusDays(keepDays);
                     List<Long> deleteJobsEvent = jobEvents.stream()
                             .filter(job -> job.getEventTime() != null && job.getEventTime().isBefore(ageLimit.toInstant()))
                             .map(JobEvent::getPk)
-                            .collect(Collectors.toList());
+                            .toList();
 
                     if (!deleteJobsEvent.isEmpty()) {
                         idsEventToDelete.addAll(deleteJobsEvent);
