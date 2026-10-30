@@ -243,8 +243,15 @@ public class TimeTableJobEventResource {
                 agg.setEndStatus(event.state);
                 long durationMillis = agg.getLastEvent().getTime() - agg.getFirstEvent().getTime();
                 agg.setDurationMillis(durationMillis);
-                agg.setType(event.type);
                 agg.setFlexible(event.getFlexible());
+
+                List<JobStatusEvent> importEvents = agg.getEvents()
+                        .stream().filter(e -> e.action.contains("IMPORT")).toList();
+                if (!importEvents.isEmpty()){
+                    agg.setType(importEvents.getLast().type);
+                }else{
+                    agg.setType(event.type);
+                }
             }
         }
 
