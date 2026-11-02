@@ -32,8 +32,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static no.rutebanken.nabu.domain.event.TimeTableAction.EXPORT;
-import static no.rutebanken.nabu.domain.event.TimeTableAction.IMPORT;
+import static no.rutebanken.nabu.domain.event.TimeTableAction.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class TimeTableJobEventResourceTest extends BaseIntegrationTest {
@@ -94,6 +93,48 @@ class TimeTableJobEventResourceTest extends BaseIntegrationTest {
         assertThat(b.getEvents().get(1).getReferential()).isEqualTo("pb");
         assertThat(b.getEvents().get(2).getChouetteJobId()).isEqualTo(1);
         assertThat(b.getEvents().get(2).getReferential()).isEqualTo("pb");
+    }
+
+    @Test
+    void testJobStatusType() {
+        List<JobEvent> rawEvents = new ArrayList<>();
+        Instant t0 = Instant.now().minusMillis(2000);
+
+        // JobStatus a
+        JobEvent jobEvent = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filenameA", 2L, null, IMPORT.toString(), JobState.PENDING, "a", t0.plusMillis(1), "ost", null, false);
+        jobEvent.setType("GTFS");
+        rawEvents.add(jobEvent);
+        jobEvent = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filenameA", 2L, null, EXPORT.toString(), JobState.PENDING, "a", t0.plusMillis(2), "ost", null, false);
+        jobEvent.setType("ARRET");
+        rawEvents.add(jobEvent);
+
+        // JobStatus b
+        jobEvent = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filenameB", 2L, null, EXPORT.toString(), JobState.PENDING, "b", t0.plusMillis(3), "ost", null, false);
+        jobEvent.setType("ARRET");
+        rawEvents.add(jobEvent);
+        jobEvent = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filenameB", 2L, null, IMPORT.toString(), JobState.PENDING, "b", t0.plusMillis(4), "ost", null, false);
+        jobEvent.setType("NETEX");
+        rawEvents.add(jobEvent);
+
+        // JobStatus c
+        jobEvent = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filenameC", 2L, null, FILE_TRANSFER.toString(), JobState.PENDING, "c", t0.plusMillis(5), "ost", null, false);
+        jobEvent.setType(null);
+        rawEvents.add(jobEvent);
+        jobEvent = new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filenameC", 2L, null, EXPORT.toString(), JobState.PENDING, "c", t0.plusMillis(6), "ost", null, false);
+        jobEvent.setType("ARRET");
+        rawEvents.add(jobEvent);
+
+        List<JobStatus> listStatus = new TimeTableJobEventResource(eventService, providerRepository).convert(rawEvents, null, false);
+
+        // assert
+        assertThat(listStatus).isNotEmpty().hasSize(3);
+
+        JobStatus a = listStatus.get(0);
+        assertThat(a.getType()).isEqualTo("GTFS");
+        JobStatus b = listStatus.get(1);
+        assertThat(b.getType()).isEqualTo("NETEX");
+        JobStatus c = listStatus.get(2);
+        assertThat(c.getType()).isEqualTo("ARRET");
     }
 
     @Test
