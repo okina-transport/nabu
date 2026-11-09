@@ -16,6 +16,7 @@
 package no.rutebanken.nabu.rest;
 
 import no.rutebanken.nabu.BaseIntegrationTest;
+import no.rutebanken.nabu.domain.event.ActionType;
 import no.rutebanken.nabu.domain.event.Event;
 import no.rutebanken.nabu.domain.event.JobEvent;
 import no.rutebanken.nabu.domain.event.JobState;
@@ -135,6 +136,35 @@ class TimeTableJobEventResourceTest extends BaseIntegrationTest {
         assertThat(b.getType()).isEqualTo("NETEX");
         JobStatus c = listStatus.get(2);
         assertThat(c.getType()).isEqualTo("ARRET");
+    }
+
+    @Test
+    void testLatestWithNoMatchingActionTypeReturnsEmptyList() {
+        List<JobEvent> rawEvents = new ArrayList<>();
+        Instant t0 = Instant.now().minusMillis(2000);
+
+        // Uniquement un job d'export : aucun job d'import
+        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename1", 2L, null, EXPORT.toString(), JobState.PENDING, "a", t0.plusMillis(1), "ost", null, false));
+        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename1", 2L, "1", EXPORT.toString(), JobState.OK, "a", t0.plusMillis(2), "ost", null, false));
+
+        List<JobStatus> listStatus = new TimeTableJobEventResource(eventService, providerRepository).convert(rawEvents, ActionType.IMPORTER, true);
+
+        assertThat(listStatus).isEmpty();
+    }
+
+    @Test
+    void testLatestWithMatchingActionTypeReturnsLastJob() {
+        List<JobEvent> rawEvents = new ArrayList<>();
+        Instant t0 = Instant.now().minusMillis(2000);
+
+        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename1", 2L, null, IMPORT.toString(), JobState.OK, "a", t0.plusMillis(1), "ost", null, false));
+        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename2", 2L, null, EXPORT.toString(), JobState.OK, "b", t0.plusMillis(2), "ost", null, false));
+        rawEvents.add(new JobEvent(JobEvent.JobDomain.TIMETABLE.toString(), "filename3", 2L, null, IMPORT.toString(), JobState.OK, "c", t0.plusMillis(3), "ost", null, false));
+
+        List<JobStatus> listStatus = new TimeTableJobEventResource(eventService, providerRepository).convert(rawEvents, ActionType.IMPORTER, true);
+
+        assertThat(listStatus).hasSize(1);
+        assertThat(listStatus.getFirst().getCorrelationId()).isEqualTo("c");
     }
 
     @Test

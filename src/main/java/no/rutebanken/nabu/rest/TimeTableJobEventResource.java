@@ -261,10 +261,11 @@ public class TimeTableJobEventResource {
 
         if (actionType != null && !list.isEmpty()) {
             if(latest) {
-                List<JobStatus> jobStatusFiltered = list.stream()
+                return list.stream()
                         .filter(event -> event.getActionType().equals(actionType))
-                        .toList();
-                return Collections.singletonList(jobStatusFiltered.getLast());
+                        .reduce((first, second) -> second)
+                        .map(Collections::singletonList)
+                        .orElse(Collections.emptyList());
             }
             else {
                 return list.stream()
